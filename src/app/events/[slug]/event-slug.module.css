@@ -1,0 +1,122 @@
+
+.page {
+    padding: 10px;
+}
+
+.event-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+}
+
+.event-title {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.event-menu {
+    display: flex;
+    flex-direction: row;
+}
+
+.event-menu-item {
+    padding: 10px 20px;
+    border: 1px solid black;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom: none;
+    cursor: pointer;
+}
+
+.event-menu-item:not(:last-child) {
+    border-right: none;
+}
+
+.event-menu-item-active {
+    background-color: black;
+    color: white;
+}
+
+.event-data {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    width: 100%;
+
+    overflow-x: scroll;
+
+    padding: 10px;
+
+    /* border */
+    border: 1px solid black;
+}
+
+.event-content {
+    width: 100%;
+}
+
+.event-overview {
+    overflow-x: scroll;
+}
+
+.event-overview-title {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    font-weight: bold;
+}
+
+.event-overview-team {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 10px;
+    border-bottom: 1px solid black;
+}
+
+.event-overview-team > * {
+    width: 100px;
+}
+
+.event-overview-team > *:nth-child(2) {
+    width: 250px;
+    color: rgb(82, 82, 243);
+    text-decoration: underline;
+}
+
+.event-overview-team > *:nth-child(6) {
+    width: 150px;
+}
+
+.event-overview-team > *:nth-child(7) {
+    width: 150px;
+}
+
+.event-overview-team > *:nth-child(8) {
+    width: 150px;
+}
+
+.event-overview-team > *:nth-child(9) {
+    width: 150px;
+}
+
+.event-overview-teams > *:first-child > *:nth-child(2) {
+    text-decoration: none;
+    color: black;
+}
+
+.event-overview-teams {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-x: scroll;
+    padding-left: 20px;
+}

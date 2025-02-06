@@ -1,12 +1,16 @@
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #030303;
+  --color-red-bg: rgb(255, 238, 238);
+  --color-blue-bg: rgb(238, 238, 255);
+  --color-correct: rgb(134, 207, 163);
+  --color-incorrect: rgb(247, 127, 132);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #030303;
   }
 }
 
@@ -37,6 +41,6 @@ a {
 
 @media (prefers-color-scheme: dark) {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 }

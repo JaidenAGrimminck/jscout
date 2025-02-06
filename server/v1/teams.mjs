@@ -1,0 +1,60 @@
+import express from "express";
+import { getTeam, getLoadedTeams, getEvent } from "../ftc_scout/FTCScoutComms.mjs";
+import bodyParser from "body-parser";
+
+const router = express.Router();
+
+router.use(bodyParser.json());
+// parse params
+
+router.get('/', async (req, res) => {
+    res.json(getLoadedTeams());
+})
+
+router.get('/:teamNumber', async (req, res) => {
+    const teamNumber = parseInt(req.params.teamNumber);
+
+    if (isNaN(teamNumber)) {
+        res.status(400).json({
+            "error": "teamNumber must be a number, not " + req.params.teamNumber
+        });
+
+        return;
+    }
+
+    let teamData = await getTeam(teamNumber);
+
+    res.json(teamData);
+})
+
+router.get('/at/:eventCode', async (req, res) => {
+    const eventCode = req.params.eventCode;
+
+    if (typeof eventCode !== "string") {
+        res.status(400).json({
+            "error": "eventCode must be a string, not " + req.params.eventCode
+        });
+
+        return;
+    }
+
+    let eventData = await getEvent(eventCode);
+
+    if (eventData === null) {
+        res.status(404).json({
+            "error": "Event not found"
+        });
+    }
+
+    const teams = eventData["teams"];
+
+    let only_numbers = [];
+
+    teams.forEach(team => {
+        only_numbers.push(team["teamNumber"]);
+    });
+
+    res.json(only_numbers);
+})
+
+export { router };

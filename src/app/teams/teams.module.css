@@ -1,0 +1,13 @@
+
+.page {
+    padding: 20px;
+}
+
+.teams-list {
+    padding-left: 20px;
+}
+
+.teams-list-item {
+    color: rgb(82, 82, 243);
+    text-decoration: underline;
+}

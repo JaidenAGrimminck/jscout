@@ -1,0 +1,17 @@
+
+.page {
+    padding: 10px;
+}
+
+.loaded-events-title {
+    padding-bottom: 10px;
+}
+
+.loaded-events-list {
+    padding-left: 20px;
+}
+
+.loaded-events-list > li {
+    color: rgb(82, 82, 243);
+    text-decoration: underline;
+}

@@ -1,0 +1,23 @@
+{
+    eventByCode(season:{{SEASON}}, code:"{{EVENT_CODE}}") {
+        name,
+        code,
+        liveStreamURL,
+        start,
+        end,
+        teams {
+            teamNumber
+        },
+        hasMatches,
+        type,
+        matches {
+            hasBeenPlayed,
+            actualStartTime,
+            id,
+            teams {
+                alliance,
+                teamNumber
+            }
+        }
+    }
+}

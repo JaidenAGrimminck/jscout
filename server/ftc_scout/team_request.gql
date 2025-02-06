@@ -1,0 +1,111 @@
+{
+    teamByNumber(number:{{teamNumber}}) {
+        name,
+        schoolName,
+        number,
+        location {
+            city,
+            country
+        },
+        awards(season:{{season}}) {
+            season,
+            type
+        },
+        quickStats(season:{{season}}) {
+            tot {
+                value,
+                rank
+            },
+            auto {
+                value,
+                rank
+            },
+            dc {
+                value,
+                rank
+            },
+            eg {
+                value,
+                rank
+            }
+        },
+        events(season:{{season}}) {
+            eventCode,
+            awards {
+                season,
+                type
+            },
+            stats {
+              	... on TeamEventStats2024 {
+                  rank,
+                  rp,
+                  wins,
+                  losses,
+                  ties
+                }
+            }
+        },
+        matches(season:{{season}}) {
+            eventCode,
+            matchId,
+            alliance,
+            surrogate,
+            match {
+                id,
+                tournamentLevel,
+                scores {
+                    ... on MatchScores2024 {
+                        red {
+                            ... on MatchScores2024Alliance {
+                                autoSampleNet,
+                                autoPark1,
+                                autoPark2,
+                                autoSampleLow,
+                                autoSampleHigh,
+                                autoSpecimenLow,
+                                autoSpecimenHigh,
+                                dcPark1,
+                                dcPark2,
+                                dcSampleNet,
+                                dcSampleLow,
+                                dcSampleHigh,
+                                dcSpecimenLow,
+                                dcSpecimenHigh,
+                                minorsCommitted,
+                                majorsCommitted,
+                                minorsByOpp,
+                                majorsByOpp,
+                                totalPoints,
+                                totalPointsNp
+                            }
+                        },
+                        blue {
+                            ... on MatchScores2024Alliance {
+                                autoSampleNet,
+                                autoPark1,
+                                autoPark2,
+                                autoSampleLow,
+                                autoSampleHigh,
+                                autoSpecimenLow,
+                                autoSpecimenHigh,
+                                dcPark1,
+                                dcPark2,
+                                dcSampleNet,
+                                dcSampleLow,
+                                dcSampleHigh,
+                                dcSpecimenLow,
+                                dcSpecimenHigh,
+                                minorsCommitted,
+                                majorsCommitted,
+                                minorsByOpp,
+                                majorsByOpp,
+                                totalPoints,
+                                totalPointsNp
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
