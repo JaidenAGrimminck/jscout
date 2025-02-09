@@ -97,9 +97,10 @@ function Menu() {
 
                 <MenuItem title="Teams" href="/teams" />
                 <MenuItem title="Events" href="/events" />
+                <MenuItem title="Schedule" href="/schedule" />
             </div>
             <div className={styles["menu-division"]}>
-                <MenuItem title="Compare" href="/compare" />
+                <MenuItem title="Playoffs Sim" href="/playoffs" />
                 <MenuSearchbar />
             </div>
         </div>

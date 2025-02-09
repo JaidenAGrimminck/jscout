@@ -8,6 +8,8 @@ import DateToReadable from "@/modules/misc/DateToReadable";
 import EventMatches from "@/modules/matches/EventMatch";
 import Link from "next/link";
 
+const numTeams = 6808;
+
 function BreakdownItem({ title, value, color }) {
     return (
         <span className={styles["breakdown-item"]} style={{ backgroundColor: color }}>
@@ -39,7 +41,7 @@ function RankingItem({ title, value }) {
         <div className={styles["ranking-item"]}>
             <strong>{valueString}</strong>
             <span>{title}</span>
-            <span>out of 6570</span>
+            <span>out of {numTeams}</span>
         </div>
     )
 }

@@ -41,4 +41,30 @@ router.get('/:eventCode', async (req, res) => {
     res.json(eventData);
 })
 
+router.get('/reload/:eventCode', async (req, res) => {
+    const eventCode = req.params.eventCode;
+
+    if (typeof eventCode !== "string") {
+        res.status(400).json({
+            "error": "eventCode must be a string, not " + req.params.eventCode
+        });
+
+        return;
+    }
+
+    if (eventCode == "null") {
+        res.status(400).json({
+            "error": "eventCode must not be null"
+        });
+
+        return;
+    }
+
+    let eventData = await getEvent(eventCode, true);
+    
+    console.log("reloading event data for", eventCode);
+
+    res.json(eventData);
+});
+
 export { router };

@@ -112,7 +112,7 @@ export default function EventMatches({ matches, filter, eventCode }) {
                         return (
                             <div key={(match.matchId === undefined ? match.id : match.matchId) + "-match-" + Math.random()} className={styles["table-match"]}>
                                 <div>
-                                    <span>Qualification {match.id}</span>
+                                <Link href={`/matches/${eventCode}:${(match.matchId === undefined ? match.id : match.matchId)}`}><span>Qualification {match.id}</span></Link>
                                 </div>
                                 <div>
                                     <span className={(match.teams[0].teamNumber == filter ? styles["underline"] : "") + " " + (scores ? (redWin ? styles["strong"] : "") : "")}><Link href={`/teams/${match.teams[0].teamNumber}`}>{match.teams[0].teamNumber}</Link></span>
@@ -164,7 +164,7 @@ export default function EventMatches({ matches, filter, eventCode }) {
                                 return (
                                     <div key={(match.matchId === undefined ? match.id : match.matchId) + "-match-" + Math.random()} className={styles["table-match"]}>
                                         <div>
-                                            <span>Playoff {Math.floor((match.id - 20000) / 1000)}-{match.id - (Math.floor(match.id / 1000) * 1000)}</span>
+                                            <Link href={`/matches/${eventCode}:${(match.matchId === undefined ? match.id : match.matchId)}`}><span>Playoff {Math.floor((match.id - 20000) / 1000)}-{match.id - (Math.floor(match.id / 1000) * 1000)}</span></Link>
                                         </div>
                                         <div>
                                             <span className={(match.teams[0].teamNumber == filter ? styles["underline"] : "") + " " + (scores ? (redWin ? styles["strong"] : "") : "")}><Link href={`/teams/${match.teams[0].teamNumber}`}>{match.teams[0].teamNumber}</Link></span>

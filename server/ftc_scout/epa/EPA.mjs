@@ -11,6 +11,13 @@ class Team {
         this.teamNumber = teamNumber;
         this.elo = 1500;
         this.loaded = false;
+
+        this.epa = {
+            tot: 0,
+            auto: 0,
+            dc: 0,
+            eg: 0
+        }
     }
 }
 
@@ -33,6 +40,8 @@ class Match {
         this.redScore = -1;
         this.blueScore = -1;
         this.loaded = false;
+
+        this.predictedWinProbability = 0;
     }
 
     load(redScore, blueScore) {
@@ -102,6 +111,15 @@ class Event {
         this.start = start;
         this.end = end;
         this.matches = [];
+    }
+
+    sortMatches() {
+        this.matches = this.matches.sort((a,b) => {
+            let aDate = new Date(a.start);
+            let bDate = new Date(b.start);
+
+            return aDate.getTime() - bDate.getTime();
+        });
     }
 }
 
@@ -173,6 +191,25 @@ class Region {
         }
 
         return Math.sqrt(sum / tot);
+    }
+
+    getAverageWeek1Score() {
+        //just get the first few events
+        let matches = this.getMatches();
+
+        let t = 0;
+        let c = 0;
+        
+        for (let i = 0; i < (5 > matches.length ? matches.length : 5); i++) {
+            let match = matches[i];
+
+            if (match.loaded) {
+                t += match.redScore + match.blueScore;
+                c += 2;
+            }
+        }
+
+        return t / c;
     }
     
     resetElo() {
@@ -391,9 +428,53 @@ async function run_simulation() {
     region.sortEventsByDate();
     console.log("Sorted events by date!");
 
+    const week1Score = region.getAverageWeek1Score();
+
+    for (let team of region.teams) {
+    }
+
     region.resetElo();
     console.log("Reset ELO!");
+
+    console.log("current standard deviation:", region.getScoreStandardDeviation());
+
+    for (let event of region.events) {
+        event.sortMatches();
+
+        for (let match of event.matches) {
+            if (!match.loaded) {
+                console.log("Match", match.id, "not loaded!");
+                continue;
+            }
+
+            //first, save the predicted win probability
+            match.predictedWinProbability = match.winProbability();
+
+            let red1 = region.getTeam(match.red1);
+            let red2 = region.getTeam(match.red2);
+            let blue1 = region.getTeam(match.blue1);
+            let blue2 = region.getTeam(match.blue2);
+
+            // elo calculations
+            let predScoreMargin = 0.004 * ((red1.elo + red2.elo) - (blue1.elo + blue2.elo));
+
+            let actualScoreMargin = (match.redScore - match.blueScore) / region.getScoreStandardDeviation();
+
+            let isQual = match.id < 1000;
+
+            let K = isQual ? 12 : 3;
+
+            let deltaR = K * (actualScoreMargin - predScoreMargin);
+
+            red1.elo += deltaR;
+            red2.elo += deltaR;
+            blue1.elo -= deltaR;
+            blue2.elo -= deltaR;
+        }
+    }
     
+    let team23014 = region.getTeam(23014);
+    console.log("23014 ELO:", team23014.elo);
 
     //exit program
     //process.exit();

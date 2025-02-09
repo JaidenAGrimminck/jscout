@@ -20,24 +20,58 @@ const url = "https://api.ftcscout.org/graphql";
 
 const delay_before_update = 1000 * 60 * 60 * 24 * 7; // 1 week
 
+//atomic variable
+let fileCurrentlyBeingAccessed = false;
+
 /**
  * Gets the team data for a team number
  * @param {Number} teamNumber The team number to get data for
  * @return {Promise} A promise that resolves with the team data
  */
-async function getTeam(teamNumber) {
+async function getTeam(teamNumber, reload=false) {
+    while (fileCurrentlyBeingAccessed) {
+        await Wait(100);
+    }
+
+    //if array
+    if (typeof teamNumber === "object" && teamNumber.length > 0) {
+
+        let teams = [];
+        for (let team of teamNumber) {
+            teams.push(await getTeam(team, reload));
+        }
+
+        return teams;
+    }
+
     if (typeof teamNumber !== "number") {
         throw new Error("teamNumber must be a number");
     }
+
+    fileCurrentlyBeingAccessed = true;
 
     loadData();
 
     const team = Memory.get("teams").find(team => team["number"] === teamNumber);
 
+    if (reload && team !== undefined) {
+        //first, remove the old team data
+        Memory.set("teams", Memory.get("teams").filter(team => team["number"] !== teamNumber));
+
+        //then, update the team data
+        await updateTeam(teamNumber);
+
+        fileCurrentlyBeingAccessed = false;
+
+        return Memory.get("teams").find(team => team["number"] === teamNumber);
+    }
+
     if (team === undefined) {
         await updateTeam(teamNumber);
 
         console.log("updated new team data for team " + teamNumber);
+
+        fileCurrentlyBeingAccessed = false;
         
         return Memory.get("teams").find(team => team["number"] === teamNumber);
     } else if (team["last_updated"] + delay_before_update < new Date().getTime()) {
@@ -49,8 +83,12 @@ async function getTeam(teamNumber) {
 
         console.log("updated stale team data for team " + teamNumber);
 
+        fileCurrentlyBeingAccessed = false;
+
         return Memory.get("teams").find(team => team["number"] === teamNumber);
     }
+
+    fileCurrentlyBeingAccessed = false;
 
     return team;
 }
@@ -60,10 +98,16 @@ async function getTeam(teamNumber) {
  * @param {String} eventCode The event code to get data for
  * @return {Promise} A promise that resolves with the event data
  */
-async function getEvent(eventCode) {
+async function getEvent(eventCode, reload=false) {
+    while (fileCurrentlyBeingAccessed) {
+        await Wait(100);
+    }
+
     if (typeof eventCode !== "string") {
         throw new Error("eventCode must be a string");
     }
+
+    fileCurrentlyBeingAccessed = true;
 
     eventCode = eventCode.toUpperCase();
 
@@ -71,19 +115,43 @@ async function getEvent(eventCode) {
     
     const event = Memory.get("events").find(event => event["code"] === eventCode);
 
+    if (reload && event !== undefined) {
+        //first, remove the old event data
+        Memory.set("events", Memory.get("events").filter(event => event["code"] !== eventCode));
+
+        console.log("reloading event data for", eventCode);
+
+        //then, update the event data
+        await updateEvent(eventCode);
+
+        fileCurrentlyBeingAccessed = false;
+
+        return Memory.get("events").find(event => event["code"] === eventCode);
+    }
+
     if (event === undefined) {
         await updateEvent(eventCode);
 
         console.log("updated new event data for event " + eventCode);
+
+        fileCurrentlyBeingAccessed = false;
         
         return Memory.get("events").find(event => event["code"] === eventCode);
     } else if (event["last_updated"] + delay_before_update < new Date().getTime()) {
+        //first, remove the old event data
+        Memory.set("events", Memory.get("events").filter(event => event["code"] !== eventCode));
+
+        //then, update the event data
         await updateEvent(eventCode);
 
         console.log("updated stale event data for event " + eventCode);
 
+        fileCurrentlyBeingAccessed = false;
+
         return Memory.get("events").find(event => event["code"] === eventCode);
     }
+
+    fileCurrentlyBeingAccessed = false;
 
     return event;
 }

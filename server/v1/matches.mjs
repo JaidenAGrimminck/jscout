@@ -64,7 +64,12 @@ router.post('/', async (req, res) => {
 
         let team1 = await getTeam(match.teams[0].teamNumber);
 
-        if (team1 === null) {
+        if (team1 === null || team1 == undefined) {
+            matchesData.push(match);
+            continue;
+        }
+
+        if (team1.matches === undefined) {
             matchesData.push(match);
             continue;
         }

@@ -5,6 +5,7 @@
   --color-blue-bg: rgb(238, 238, 255);
   --color-correct: rgb(134, 207, 163);
   --color-incorrect: rgb(247, 127, 132);
+  --color-neutral: rgb(207, 207, 207);
 }
 
 @media (prefers-color-scheme: dark) {

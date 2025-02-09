@@ -1,0 +1,45 @@
+
+.event-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0px;
+    border-bottom: 1px solid rgb(207, 207, 207);
+}
+
+.event-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgb(207, 207, 207);
+    border-top: 1px solid rgb(207, 207, 207);
+
+    width: 100%;
+
+    background-color: rgb(158, 158, 158);
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgb(207, 207, 207);
+    width: 100%;
+}
+
+.column-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgb(207, 207, 207);
+    width: 100%;
+}
+
+.schedule-container {
+    padding: 10px;
+}

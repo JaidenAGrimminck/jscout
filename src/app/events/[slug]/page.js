@@ -48,9 +48,14 @@ function EventOverview({ eventData }) {
         if (teamData[b.teamNumber] == null) {
             return 0;
         }
+        let aStats, bStats;
+        if (teamData[a.teamNumber].events.filter((event) => event.eventCode == eventData.code)[0] != null) {
+            aStats = teamData[a.teamNumber].events.filter((event) => event.eventCode == eventData.code)[0].stats;
+        } else aStats = null;
 
-        let aStats = teamData[a.teamNumber].events.filter((event) => event.eventCode == eventData.code)[0].stats;
-        let bStats = teamData[b.teamNumber].events.filter((event) => event.eventCode == eventData.code)[0].stats;
+        if (teamData[b.teamNumber].events.filter((event) => event.eventCode == eventData.code)[0] != null) {
+            bStats = teamData[b.teamNumber].events.filter((event) => event.eventCode == eventData.code)[0].stats;
+        } else bStats = null;
 
         if (aStats == null && bStats == null) {
             return compareTotOPR(b,a);
@@ -197,7 +202,8 @@ function EventOverview({ eventData }) {
                             )
                         }
 
-                        let thisEventStats = _teamData.events.filter((event) => !eventOccurred || event.eventCode == eventData.code)[0].stats;
+                        // ignore !eventOccured, need this event.
+                        let thisEventStats = _teamData.events.filter((event) => event.eventCode == eventData.code)[0].stats;
 
                         let thisEventGames = _teamData.matches.filter((match) => !eventOccurred || match.eventCode == eventData.code);
                         

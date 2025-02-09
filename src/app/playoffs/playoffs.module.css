@@ -1,0 +1,173 @@
+
+
+.playoff-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    padding: 20px;
+    width: 100%;
+    overflow-x: scroll;
+}
+
+.playoff-titles {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.playoff-titles > * {
+    min-width: 200px;
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.playoff-structure {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.playoff-round {
+    min-width: 200px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.playoff {
+    width: 100%;
+    background-color: gray;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 50px;
+    border-radius: 5px;
+    /* box shadow */
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.playoff-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: center;
+    width: 50%;
+}
+
+.playoff-side:first-child {
+    border-right: 1px solid black;
+}
+.playoff-side:last-child {
+    border-left: 1px solid black;
+}
+
+
+.playoff-teams {
+    margin-bottom: 10px;
+}
+
+.playoff-team {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-decoration: underline;
+}
+
+.playoff-side:first-child .playoff-team:first-child {
+    border-top-left-radius: 5px;
+}
+
+.playoff-side:last-child .playoff-team:first-child {
+    border-top-right-radius: 5px;
+}
+
+.playoff-team:first-child {
+    padding-top: 10px;
+    padding-bottom: 2.5px;
+}
+
+.playoff-team:last-child {
+    padding-bottom: 10px;
+    padding-top: 2.5px;
+}
+
+.playoff-side:first-child .playoff-prediction {
+    border-bottom-left-radius: 5px;
+}
+
+.playoff-side:last-child .playoff-prediction {
+    border-bottom-right-radius: 5px;
+}
+
+.playoff-prediction {
+    font-size: 1.5rem;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.centered {
+    margin-top: 50%;
+    /* small weird adjustment to fix css rendering issue */
+    transform: translateY(calc(-50% - 1.25px));
+}
+
+.skip-to-bottom {
+    margin-top: 80%;
+}
+
+.alliance-selection-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-bottom: 50px;
+}
+
+.alliance-selection {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 1px solid rgb(194, 194, 194);
+    border-radius: 5px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.alliance-selection-title {
+    text-align: center;
+    margin: 10px 10px;
+}
+
+.alliance-selection-teams {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.alliance-selection-teams > input {
+    text-align: left;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+.alliance-selection-teams > button {
+    margin-bottom: 10px;
+    padding: 5px 0px;
+    cursor: pointer;
+    background-color: rgb(0, 123, 255);
+    border: none;
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.alliance-selection-teams > button:hover {
+    background-color: rgb(0, 100, 255);
+}
+
+.alliance-selection-teams > button:active {
+    background-color: rgb(0, 80, 255);
+}
