@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import { getTeam } from './ftc_scout/FTCScoutComms.mjs';
 import { router as v1 } from './v1/Apiv1.mjs';
 
-const port = 3002;
+const port = 3734;
 
 const app = express();
 

@@ -6,10 +6,12 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import Menu from "../modules/menu/menu";
 import getURL from "@/modules/server/Server";
+import ConnectedToBackend from "@/modules/server/Connection";
 
 export default function Home() {
     const [loadedTeams, setLoadedTeams] = useState([]);
     const [loadedEvents, setLoadedEvents] = useState([]);
+    const [connected,  setConnected] = useState(false);
 
     useEffect(() => {
         fetch(`${getURL()}/v1/teams`)
@@ -22,6 +24,10 @@ export default function Home() {
             .then((data) => {
                 setLoadedEvents(data);
             });
+        ConnectedToBackend().then((data) => {
+            setConnected(data);
+        });
+        
     }, []);
 
     return (
@@ -34,6 +40,9 @@ export default function Home() {
                 </span> <br/>
                 <span>
                     Loaded events in memory: {loadedEvents.length}
+                </span>
+                <span>
+                    Backend connected: {connected ? <b style={{ color: "var(--color-correct)"}}>Yes</b> : <b style={{ color: "var(--color-incorrect)"}}>Yes</b>}
                 </span>
             </div>
         </div>
