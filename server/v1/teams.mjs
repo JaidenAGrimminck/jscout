@@ -1,6 +1,7 @@
 import express from "express";
 import { getTeam, getLoadedTeams, getEvent } from "../ftc_scout/FTCScoutComms.mjs";
 import bodyParser from "body-parser";
+import { getEPATeam } from "../ftc_scout/epa/EPA.mjs";
 
 const router = express.Router();
 
@@ -23,6 +24,12 @@ router.get('/:teamNumber', async (req, res) => {
     }
 
     let teamData = await getTeam(teamNumber);
+
+    let epa = getEPATeam(teamNumber);
+
+    if (epa !== null) {
+        teamData["epa"] = epa;
+    }
 
     res.json(teamData);
 })

@@ -18,7 +18,7 @@ const blank_data = {
 
 const url = "https://api.ftcscout.org/graphql";
 
-const delay_before_update = 1000 * 60 * 60 * 24 * 7; // 1 week
+const delay_before_update = 1000 * 60 * 60 * 24 * 7 * 10; // 1 week
 
 //atomic variable
 let fileCurrentlyBeingAccessed = false;
@@ -189,7 +189,11 @@ async function updateEvent(eventCode, season=2024) {
 
     const query = gql`${rawGQL.replaceAll("{{EVENT_CODE}}", eventCode).replaceAll("{{SEASON}}", season)}`;
 
-    await queryEventData(query);
+    try {
+        await queryEventData(query);
+    } catch (err) {
+        console.log("error for event", eventCode, ":", err);
+    }
 }
 
 /**
@@ -257,6 +261,11 @@ function queryTeamData(query) {
 function queryEventData(query) {
     return new Promise((resolve, reject) => {
         request(url, query).then(async data => {
+            if (data == null || data["eventByCode"] == null) {
+                reject("no data");
+                return;
+            }
+
             const newObject = Object.assign(data["eventByCode"], {
                 last_updated: new Date().getTime()
             });

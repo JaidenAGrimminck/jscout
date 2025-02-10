@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import Menu from "@/modules/menu/menu";
 import styles from "./events.module.css";
 import Link from "next/link";
+import getURL from "@/modules/server/Server";
 
 export default function Event() {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        fetch(`${"http://localhost:3002"}/v1/events`)
+        fetch(`${getURL()}/v1/events`)
             .then((response) => response.json())
             .then((data) => setEvents(data))
     }, []);

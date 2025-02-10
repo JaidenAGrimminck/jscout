@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from "./evtmatches.module.css";
 import Link from 'next/link';
+import getURL from '../server/Server';
 
 export default function EventMatches({ matches, filter, eventCode }) {
     const [matchData, setMatchData] = useState([]);
@@ -35,7 +36,7 @@ export default function EventMatches({ matches, filter, eventCode }) {
 
     React.useEffect(() => {     
         if (allMatchIds.length > 0) {
-            fetch(`${"http://localhost:3002"}/v1/matches`, {
+            fetch(`${getURL()}/v1/matches`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -52,6 +53,12 @@ export default function EventMatches({ matches, filter, eventCode }) {
                 });
         }
     }, []);
+
+    const widdleDown = (n1, l) => {
+        let toStr = n1.toString();
+        let n2 = toStr.substring(0, l);
+        return n2;
+    }
 
     if (matchData.length !== allMatchIds.length) {
         return (
@@ -102,12 +109,45 @@ export default function EventMatches({ matches, filter, eventCode }) {
                         let scores = matchData.find((matchData) => {
                             return matchData.id === (match.matchId === undefined ? match.id : match.matchId);
                         });
+                        
+                        let omatch = null;
 
                         if (scores !== undefined && scores !== null) {
+                            omatch = scores;
                             scores = scores.scores;
                         }
 
                         let redWin = scores ? (scores.red.totalPoints > scores.blue.totalPoints) : false;
+
+                        let onRed = false;
+
+                        if (match.teams[0].teamNumber == filter || match.teams[1].teamNumber == filter) {
+                            onRed = true;
+                        }
+                        
+                        let pred = omatch ? Math.round(omatch.predicted_red_win_probability * 1000) / 10 : "n/a";
+
+                        if (filter) {
+                            if (!onRed) {
+                                pred = 100 - pred;
+                            }
+                        }
+
+                        let correctPred = false;
+
+                        if (scores) {
+                            correctPred = (scores.red.totalPoints > scores.blue.totalPoints) == (omatch.predicted_red_win_probability > 0.5);
+                        }
+
+                        let predRedEPA = -1;
+                        let predBlueEPA = -1;
+
+                        if (omatch) {
+                            if (omatch.epa) {
+                                predRedEPA = omatch.epa.red.tot;
+                                predBlueEPA = omatch.epa.blue.tot;
+                            }
+                        }
 
                         return (
                             <div key={(match.matchId === undefined ? match.id : match.matchId) + "-match-" + Math.random()} className={styles["table-match"]}>
@@ -129,13 +169,19 @@ export default function EventMatches({ matches, filter, eventCode }) {
                                     <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>{scores ? scores.blue.totalPoints : "n/a"} {scores ? (scores.blue.totalPointsNp < scores.blue.totalPoints ? `(${scores.blue.totalPointsNp}+${scores.blue.totalPoints - scores.blue.totalPointsNp})` : ``) : "" }</span>
                                 </div>
                                 <div>
-                                    <span className={scores ? (scores.red.totalPoints > scores.blue.totalPoints ? styles["strong"] : "") : ""}>{"n/a"}</span>
+                                    <span className={scores ? (scores.red.totalPoints > scores.blue.totalPoints ? styles["strong"] : "") : ""}>
+                                        {predRedEPA > -1 ? Math.round(predRedEPA) : "n/a"}
+                                    </span>
                                 </div>
                                 <div>
-                                    <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>{"n/a"}</span>
+                                    <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>
+                                        {predBlueEPA > -1 ? Math.round(predBlueEPA) : "n/a"}
+                                    </span>
                                 </div>
-                                <div>
-                                    <span>XX% (XXX)</span>
+                                <div style={{
+                                    backgroundColor: (typeof pred === "number" ? (correctPred ? "var(--color-correct)" : "var(--color-incorrect)") : "var(--color-neutral)")
+                                }}>
+                                    <span>{widdleDown(pred, 4)}% {typeof pred === "number" ? `(${pred > 50 ? "Win" : pred == 50 ? "Tie" : "Loss"})` : ``}</span>
                                 </div>
                             </div>
                         );
@@ -155,11 +201,44 @@ export default function EventMatches({ matches, filter, eventCode }) {
                                     return matchData.id === (match.matchId === undefined ? match.id : match.matchId);
                                 });
 
+                                let omatch = null;
+
                                 if (scores !== undefined && scores !== null) {
+                                    omatch = scores;
                                     scores = scores.scores;
                                 }
 
                                 let redWin = scores ? (scores.red.totalPoints > scores.blue.totalPoints) : false;
+
+                                let onRed = false;
+
+                                if (match.teams[0].teamNumber == filter || match.teams[1].teamNumber == filter) {
+                                    onRed = true;
+                                }
+                                
+                                let pred = omatch ? Math.round(omatch.predicted_red_win_probability * 1000) / 10 : "n/a";
+
+                                if (filter) {
+                                    if (!onRed) {
+                                        pred = 100 - pred;
+                                    }
+                                }
+
+                                let correctPred = false;
+
+                                if (scores) {
+                                    correctPred = (scores.red.totalPoints > scores.blue.totalPoints) == (omatch.predicted_red_win_probability > 0.5);
+                                }
+
+                                let predRedEPA = -1;
+                                let predBlueEPA = -1;
+
+                                if (omatch) {
+                                    if (omatch.epa) {
+                                        predRedEPA = omatch.epa.red.tot;
+                                        predBlueEPA = omatch.epa.blue.tot;
+                                    }
+                                }
 
                                 return (
                                     <div key={(match.matchId === undefined ? match.id : match.matchId) + "-match-" + Math.random()} className={styles["table-match"]}>
@@ -181,13 +260,19 @@ export default function EventMatches({ matches, filter, eventCode }) {
                                             <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>{scores ? scores.blue.totalPoints : "n/a"}</span>
                                         </div>
                                         <div>
-                                            <span className={scores ? (scores.red.totalPoints > scores.blue.totalPoints ? styles["strong"] : "") : ""}>{"n/a"}</span>
+                                            <span className={scores ? (scores.red.totalPoints > scores.blue.totalPoints ? styles["strong"] : "") : ""}>
+                                                {predRedEPA > -1 ? Math.round(predRedEPA) : "n/a"}
+                                            </span>
                                         </div>
                                         <div>
-                                            <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>{"n/a"}</span>
+                                            <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>
+                                                {predBlueEPA > -1 ? Math.round(predBlueEPA) : "n/a"}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <span>XX% (XXX)</span>
+                                        <div style={{
+                                            backgroundColor: (typeof pred === "number" ? (correctPred ? "var(--color-correct)" : "var(--color-incorrect)") : "var(--color-neutral)")
+                                        }}>
+                                            <span>{widdleDown(pred, 4)}% {typeof pred === "number" ? `(${pred > 50 ? "Win" : "Loss"})` : ``}</span>
                                         </div>
                                     </div>
                                 );

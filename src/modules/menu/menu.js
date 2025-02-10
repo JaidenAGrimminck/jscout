@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import styles from "./menu.module.css";
 import { useRouter } from 'next/navigation';
+import getURL from "../server/Server";
 //import Event from "@/app/pages/event/[event]";
 
 function MenuItem(props) {
@@ -42,7 +43,7 @@ function MenuSearchbar(props) {
     };
 
     const loadFromBackend = async () => {
-        const req = await fetch(`${"http://localhost:3002"}/v1/teams`);
+        const req = await fetch(`${getURL()}/v1/teams`);
         const data = await req.json();
 
         setTeamData(data);

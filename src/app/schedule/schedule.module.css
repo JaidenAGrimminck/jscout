@@ -43,3 +43,24 @@
 .schedule-container {
     padding: 10px;
 }
+
+.time-tell-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    user-select: none;
+    pointer-events: none;
+}
+
+.time-tell {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: rgb(218, 0, 0);
+    user-select: none;
+    pointer-events: none;
+}

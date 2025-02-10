@@ -5,6 +5,7 @@ import Menu from "@/modules/menu/menu";
 import styles from "./event-slug.module.css";
 import Link from "next/link";
 import getColor from "@/modules/misc/ColorScale";
+import getURL from "@/modules/server/Server";
 
 function EventOverview({ eventData }) {
     const [teamData, setTeamData] = React.useState({});
@@ -20,7 +21,7 @@ function EventOverview({ eventData }) {
         const _teamData = {};
 
         await eventData.teams.forEach(async (team) => {
-            const req = await fetch(`${"http://localhost:3002"}/v1/teams/${team.teamNumber}`);
+            const req = await fetch(`${getURL()}/v1/teams/${team.teamNumber}`);
             const data = await req.json();
 
             _teamData[team.teamNumber] = data;
@@ -224,6 +225,10 @@ function EventOverview({ eventData }) {
                         if (thisEventGames.length > 0) {
                             for (let i = 0; i < thisEventGames.length; i++) {
                                 const alliance = thisEventGames[i].alliance;
+                                if (thisEventGames[i].match.scores == null) {
+                                    continue;
+                                }
+
                                 const scores = thisEventGames[i].match.scores[alliance.toLowerCase()];
 
                                 avgSamples.high += scores.dcSampleHigh// + scores.autoSampleHigh;
@@ -376,7 +381,7 @@ function EventSlug({ params }) {
             return;
         }
 
-        const req = await fetch(`${"http://localhost:3002"}/v1/events/${slug}`);
+        const req = await fetch(`${getURL()}/v1/events/${slug}`);
         const data = await req.json();
 
         setEventData(data);

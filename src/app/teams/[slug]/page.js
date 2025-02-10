@@ -7,6 +7,7 @@ import styles from "./team-slug.module.css";
 import DateToReadable from "@/modules/misc/DateToReadable";
 import EventMatches from "@/modules/matches/EventMatch";
 import Link from "next/link";
+import getURL from "@/modules/server/Server";
 
 const numTeams = 6808;
 
@@ -50,7 +51,7 @@ function Event({ eventData, teamData }) {
     const [fullEventData, setFullEventData] = React.useState(null);
 
     const getEventData = async (eventCode) => {
-        const req = await fetch(`${"http://localhost:3002"}/v1/events/${eventCode}`);
+        const req = await fetch(`${getURL()}/v1/events/${eventCode}`);
         const data = await req.json();
 
         setFullEventData(data);
@@ -115,6 +116,11 @@ function TeamOverview({ teamData }) {
 
         for (let match of teamData.matches) {
             let thisAlliance = match.alliance;
+
+            if (match.match.scores == null) {
+                continue;
+            }
+
             let blueScore = match.match.scores.blue.totalPoints;
             let redScore = match.match.scores.red.totalPoints;
 
@@ -164,10 +170,10 @@ function TeamOverview({ teamData }) {
                 </p>
                 <p>
                     EPA Breakdown: 
-                    <BreakdownItem title={"Auto"} value={quickStats ? quickStats.auto.value : 0} color={"rgb(31, 119, 180)"}/>
-                    <BreakdownItem title={"Teleop"} value={quickStats ? quickStats.dc.value : 0} color={"rgb(255, 127, 14)"}/>
-                    <BreakdownItem title={"Endgame"} value={quickStats ? quickStats.eg.value : 0} color={"rgb(44, 160, 44)"}/>
-                    <BreakdownItem title={"Total"} value={quickStats ? quickStats.tot.value : 0} color={"rgb(214, 39, 40)"}/>
+                    <BreakdownItem title={"Auto"} value={teamData.epa ? teamData.epa.epa.auto : 0} color={"rgb(31, 119, 180)"}/>
+                    <BreakdownItem title={"Teleop"} value={teamData.epa ? teamData.epa.epa.dc : 0} color={"rgb(255, 127, 14)"}/>
+                    <BreakdownItem title={"Endgame"} value={teamData.epa ? teamData.epa.epa.eg : 0} color={"rgb(44, 160, 44)"}/>
+                    <BreakdownItem title={"Total"} value={teamData.epa ? teamData.epa.epa.tot : 0} color={"rgb(214, 39, 40)"}/>
                 </p>
                 <div className={styles["ranking"]}>
                     <RankingItem title={"Worldwide"} value={quickStats ? quickStats.tot.rank : 0}/>
@@ -244,7 +250,7 @@ export default function Teams({ params }) {
     const [teamData, setTeamData] = React.useState({});
 
     const getTeamData = async (slug) => {
-        const req = await fetch(`${"http://localhost:3002"}/v1/teams/${slug}`);
+        const req = await fetch(`${getURL()}/v1/teams/${slug}`);
         const data = await req.json();
 
         setTeamData(data);

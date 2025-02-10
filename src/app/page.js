@@ -5,18 +5,19 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import Link from "next/link";
 import Menu from "../modules/menu/menu";
+import getURL from "@/modules/server/Server";
 
 export default function Home() {
     const [loadedTeams, setLoadedTeams] = useState([]);
     const [loadedEvents, setLoadedEvents] = useState([]);
 
     useEffect(() => {
-        fetch(`${"http://localhost:3002"}/v1/teams`)
+        fetch(`${getURL()}/v1/teams`)
             .then((response) => response.json())
             .then((data) => {
                 setLoadedTeams(data);
             });
-        fetch(`${"http://localhost:3002"}/v1/events`)
+        fetch(`${getURL()}/v1/events`)
             .then((response) => response.json())
             .then((data) => {
                 setLoadedEvents(data);

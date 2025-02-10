@@ -146,7 +146,6 @@ function EventItem({ event, prevEvent, startTime }) {
 
 
 export default function EventSchedule() {
-
     const columnCount = 3;
     const columns = Array.from({ length: columnCount }, () => []);
     schedule.forEach((event) => {
@@ -158,6 +157,10 @@ export default function EventSchedule() {
             <Menu />
             <div className={styles["schedule-container"]}>
                 <h1>Event Schedule</h1>
+                <div className={styles["time-tell-container"]}>
+                    <div className={styles["time-tell"]} style={{ marginTop: ((new Date().getHours() - schedule[0].start[0]) * heightPerHour + (new Date().getMinutes() - schedule[0].start[1]) * heightPerHour / 60) + 130 }}>
+                    </div>
+                </div>
                 <div className={styles["column-container"]}>
                     {columns.map((column, i) => {
                         return (

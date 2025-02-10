@@ -1,5 +1,6 @@
 import express from "express";
 import { getTeam, getLoadedTeams, getEvent } from "../ftc_scout/FTCScoutComms.mjs";
+import { getMatch, predictMatch } from "../ftc_scout/epa/EPA.mjs";
 import bodyParser from "body-parser";
 
 const router = express.Router();
@@ -80,11 +81,41 @@ router.post('/', async (req, res) => {
         });
 
         if (matchTeam === undefined) {
+            const epa = getMatch(eventCode, matchId);
+
+            if (epa !== undefined && epa !== null && Object.keys(epa).includes("predictedWinProbability")) {
+                match["predicted_red_win_probability"] = 1 - epa.predictedWinProbability;
+            } else {
+                match["predicted_red_win_probability"] = 1 - predictMatch(match.teams[0].teamNumber, match.teams[1].teamNumber, match.teams[2].teamNumber, match.teams[3].teamNumber);
+            }
+
+            if (epa !== undefined && epa !== null) {
+                if (Object.keys(epa).includes("epa")) {
+                    match["epa"] = epa.epa;
+                }
+            }
+
             matchesData.push(match);
             continue;
         }
 
-        matchesData.push(Object.assign(match, matchTeam.match));
+        let n_matchData = Object.assign(match, matchTeam.match);
+        
+        const epa = getMatch(eventCode, matchId);
+
+        if (epa !== null && Object.keys(epa).includes("predictedWinProbability")) {
+            n_matchData["predicted_red_win_probability"] = 1 - epa.predictedWinProbability;
+        } else {
+            n_matchData["predicted_red_win_probability"] = 1 - predictMatch(match.teams[0], match.teams[1], match.teams[2], match.teams[3]);
+        }
+
+        if (epa !== undefined && epa !== null) {
+            if (Object.keys(epa).includes("epa")) {
+                match["epa"] = epa.epa;
+            }
+        }
+
+        matchesData.push(n_matchData);
     }
 
     res.json(matchesData);
@@ -147,7 +178,48 @@ router.get('/:eventCode/:matchId', async (req, res) => {
         return;
     }
 
-    res.json(Object.assign(match, matchTeam.match));
+    let n_matchData = Object.assign(match, matchTeam.match);
+        
+    const epa = getMatch(eventCode, matchId);
+
+    if (epa !== null && Object.keys(epa).includes("predictedWinProbability")) {
+        n_matchData["predicted_red_win_probability"] = 1 - epa.predictedWinProbability;
+    } else {
+        n_matchData["predicted_red_win_probability"] = 1 - predictMatch(match.teams[0], match.teams[1], match.teams[2], match.teams[3]);
+    }
+
+    if (epa !== undefined && epa !== null) {
+        if (Object.keys(epa).includes("epa")) {
+            match["epa"] = epa.epa;
+        }
+    }
+
+
+    res.json(n_matchData);
+});
+
+router.get('/predict/:red1/:red2/:blue1/:blue2', async (req, res) => {
+    const red1 = req.params.red1;
+    const red2 = req.params.red2;
+    const blue1 = req.params.blue1;
+    const blue2 = req.params.blue2;
+
+    if (isNaN(parseInt(red1)) || isNaN(parseInt(red2)) || isNaN(parseInt(blue1)) || isNaN(parseInt(blue2))) {
+        res.status(400).json({
+            "error": "All team numbers must be numbers"
+        });
+
+        return;
+    }
+
+    res.json({
+        "predicted_red_win_probability": 1 - predictMatch(
+            parseInt(red1),
+            parseInt(red2),
+            parseInt(blue1),
+            parseInt(blue2)
+        )
+    });
 });
 
 export { router };

@@ -5,12 +5,13 @@ import React, { useState, useEffect } from 'react';
 
 import styles from './teams.module.css';
 import Link from 'next/link';
+import getURL from '@/modules/server/Server';
 
 export default function Teams() {
     const [loadedTeams, setLoadedTeams] = useState([]);
 
     useEffect(() => {
-        fetch(`${"http://localhost:3002"}/v1/teams`)
+        fetch(`${getURL()}/v1/teams`)
             .then(response => {
                 return response.json();
             })
