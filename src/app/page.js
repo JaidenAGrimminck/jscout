@@ -41,8 +41,8 @@ export default function Home() {
                 <span>
                     Loaded events in memory: {loadedEvents.length}
                 </span>
-                <span>
-                    Backend connected: {connected ? <b style={{ color: "var(--color-correct)"}}>Yes</b> : <b style={{ color: "var(--color-incorrect)"}}>Yes</b>}
+                <span> <br/> <br/>
+                    Backend connected: {connected ? <b style={{ color: "var(--color-correct)"}}>Yes</b> : <b style={{ color: "var(--color-incorrect)"}}>No</b>}
                 </span>
             </div>
         </div>
