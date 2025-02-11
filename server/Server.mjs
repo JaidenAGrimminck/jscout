@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
     res.json({
-        "api_versions": ["1.0"]
+        "api_versions": ["v1"]
     });
 });
 

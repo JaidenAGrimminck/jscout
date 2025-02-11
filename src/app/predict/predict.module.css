@@ -1,0 +1,120 @@
+
+.predict-page {
+    width: 100%;
+    padding: 10px;
+}
+
+.predict-teams {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.predict-team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid black;
+}
+
+.predict-team:first-child {
+    background-color: var(--color-red-bg);
+}
+
+.predict-team:last-child {
+    background-color: var(--color-blue-bg);
+}
+
+.predict-team-inputs {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.predict-team-inputs > input {
+    margin-bottom: 10px;
+    font-size: 16px;
+    padding-left: 5px;
+}
+
+.predict-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.predict-button-container > button {
+    width: 100px;
+    height: 40px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.predict-button-container > button:hover {
+    background-color: #0056b3;
+}
+
+.predict-button-container > button:active {
+    background-color: #004286;
+}
+
+.predict-button-container > button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.results-center-container {
+    margin-top: 30px;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.predict-results-container {
+    width: 300px;
+    display: flex;
+    flex-direction: row;
+}
+
+.predict-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid black;
+    margin-top: 20px;
+
+    background-color: var(--color-neutral);
+}
+
+.predict-results:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-right: 1px solid var(--color-neutral);
+}
+
+.predict-results:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-left: 1px solid var(--color-neutral);
+}
+
+.predict-results-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.predict-results-value {
+    font-size: 1.75rem;
+    font-weight: bold;
+}

@@ -5,6 +5,7 @@ import React from "react";
 import styles from "./playoffs.module.css";
 import Menu from "@/modules/menu/menu";
 import Link from "next/link";
+import getURL from "@/modules/server/Server";
 
 const playoffStructure = [
     [ // round 1
@@ -60,10 +61,24 @@ const playoffStructure = [
 ];
 
 function Playoff(props) {
+    const [winPercentage, setWinPercentage] = React.useState(50);
+
     const skipToBottom = props.skipToBottom || false;
     const centered = props.centered || false;
 
     const redWinPercentage = props.winPercentage || 49;
+
+    const red1 = props.red1 || 0;
+    const red2 = props.red2 || 0;
+    const blue1 = props.blue1 || 0;
+    const blue2 = props.blue2 || 0;
+
+    const predictMatch = async (red1, red2, blue1, blue2) => {
+        const req = await fetch(`${getURL()}/v1/matches/predict/${red1}/${red2}/${blue1}/${blue2}`);
+        const data = await req.json();
+
+        return data["predicted_red_win_probability"];
+    }
 
     function PlayoffSide({ team1, team2, percentage, isRed }) {
         return (
@@ -90,15 +105,32 @@ function Playoff(props) {
         )
     }
 
+    React.useState(() => {
+        if (red1 != 0 && red2 != 0 && blue1 != 0 && blue2 != 0) {
+            // predictMatch(red1, red2, blue1, blue2).then((data) => {
+            //     setWinPercentage(Math.round(data * 10000) / 100);
+            // });
+        }
+    }, [])
+
+    console.log(red1, red2)
+
     return (
         <div className={styles["playoff"]  + " " + (centered ? styles["centered"] : "") + " " + (skipToBottom ? styles["skip-to-bottom"] : "")}>
-            <PlayoffSide team1={"XXXXX"} team2={"XXXXX"} percentage={redWinPercentage} isRed={true} />
-            <PlayoffSide team1={"XXXXX"} team2={"XXXXX"} percentage={100 - redWinPercentage} isRed={false} />
+            <PlayoffSide team1={red1 != 0 ? red1 : "XXXXX"} team2={red2 != 0 ? red2 : "XXXXX"} percentage={winPercentage} isRed={true} />
+            <PlayoffSide team1={blue1 != 0 ? blue1 : "XXXXX"} team2={blue2 != 0 ? blue2 : "XXXXX"} percentage={100 - winPercentage} isRed={false} />
         </div>
     )
 }
 
 export default function Playoffs() {
+    const [alliances, setAlliances] = React.useState([
+        [0,0],
+        [0,0],
+        [0,0],
+        [0,0]
+    ]);
+
 
     function AllianceSelection({ alliance, onTeamChange }) {
 
@@ -131,7 +163,9 @@ export default function Playoffs() {
     }
 
     const onTeamChange = (alliance, team1, team2) => {
-        console.log(`Alliance ${alliance} updated to ${team1} and ${team2}`);
+        let currentAlliances = alliances;
+        currentAlliances[alliance - 1] = [parseInt(team1), parseInt(team2)];
+        setAlliances(currentAlliances);
     }
 
     return (
@@ -152,8 +186,14 @@ export default function Playoffs() {
                 </div>
                 <div className={styles["playoff-structure"]}>
                     <div className={styles["playoff-round"]}>
-                        <Playoff />
-                        <Playoff />
+                        <Playoff 
+                            red1={alliances[0][0] != 0 && alliances[0][0]} red2={alliances[0][1] != 0 && alliances[0][1]}
+                            blue1={alliances[3][0] != 0 && alliances[3][0]} blue2={alliances[3][1] != 0 && alliances[3][1]}
+                        />
+                        <Playoff 
+                            red1={alliances[1][0] != 0 && alliances[1][0]} red2={alliances[1][1] != 0 && alliances[1][1]}
+                            blue1={alliances[2][0] != 0 && alliances[2][0]} blue2={alliances[2][1] != 0 && alliances[2][1]}
+                        />
                     </div>
                     <div className={styles["playoff-round"]}>
                         <Playoff />

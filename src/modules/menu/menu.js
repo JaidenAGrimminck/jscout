@@ -101,6 +101,7 @@ function Menu() {
                 <MenuItem title="Schedule" href="/schedule" />
             </div>
             <div className={styles["menu-division"]}>
+                <MenuItem title="Predict" href="/predict" />
                 <MenuItem title="Playoffs Sim" href="/playoffs" />
                 <MenuSearchbar />
             </div>
