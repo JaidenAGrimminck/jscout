@@ -30,14 +30,14 @@ const schedule = [
     {
         start: [9, 30],
         end: [11, 0],
-        name: "Robot Inspections",
+        name: "Robot Inspections (23014 at 9:50 - 10:10)",
         location: "Game Arena",
         column: 1
     },
     {
         start: [9, 30],
         end: [11, 0],
-        name: "Judge Interviews",
+        name: "Judge Interviews (23014 at 10:30 - 10:50)",
         location: "Open X ground floors",
         column: 2
     },
