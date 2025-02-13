@@ -778,6 +778,7 @@ async function run_simulation() {
     
     if (stopLikeAllMessages) {
         console.log("ran EPA calculations on all matches.");
+        //predictTeamForEvent(23014, "NLCMP");
         return;
     }
 
@@ -834,6 +835,51 @@ function predictMatch(red1, red2, blue1, blue2) {
     }
 
     return new Match(0, 0, false, red1, red2, blue1, blue2).winProbability();
+}
+
+async function predictTeamForEvent(my_team, eventCode) {
+    // predict all solo possible matchups for that team at the event
+    let event = await getEvent(eventCode);
+
+    // get all teams at the event
+    let teams = event.teams.map(team => team.teamNumber);
+
+    let probs = [];
+
+    for (let team of teams) {
+        if (my_team === team) {
+            continue;
+        }
+
+        probs.push([
+            team,
+            1 - predictMatch(my_team, 24500, team, 24500)
+        ])
+    }
+
+    // sort by probability (increasing)
+    probs = probs.sort((a, b) => a[1] - b[1]);
+
+    for (let prob of probs) {
+        console.log(`Team ${my_team} has a ${Math.round(prob[1] * 10000) / 100}% chance of beating team ${prob[0]}`);
+    }
+
+    let rawProbList = probs.map(prob => Math.round(prob[1] * 10000) / 100);
+    let rawTeamList = probs.map(prob => prob[0]);
+
+    // console.log so this can be pasted into a spreadsheet
+    console.log(rawProbList.join("\n"));
+    console.log(rawTeamList.join("\n"));
+    console.log("\n")
+
+    let teamNames = [];
+
+    for (let team of rawTeamList) {
+        let teamData = await getTeam(team);
+        teamNames.push(teamData.name);
+    }
+
+    console.log(teamNames.join("\n"));
 }
 
 run_simulation();

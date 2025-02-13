@@ -35,6 +35,7 @@ function EventOverview({ eventData }) {
 
         setTeamData(_teamData);
         console.log(_teamData)
+        console.log(`Number of teams:`, Object.keys(_teamData).length)
     }
 
     React.useEffect(() => {
@@ -107,6 +108,8 @@ function EventOverview({ eventData }) {
 
     const eventOccurred = eventData ? eventData.matches.length > 0 : false;
 
+    let avgOPR = 0;
+
     return (
         <div className={styles["event-overview"] + " " + styles["event-data"]}>
             <div key={"event-overview-title"} className={styles["event-overview-title"]}>
@@ -172,8 +175,17 @@ function EventOverview({ eventData }) {
                     
                 </div>
                 {
-                    eventData && (teamData ? eventData.teams.sort(compareRankingPoints) : eventData.teams.sort(compareTotOPR)).map((team) => {
+                    eventData && (teamData ? eventData.teams.sort(compareRankingPoints) : eventData.teams.sort(compareTotOPR)).map((team, j) => {
                         const _teamData = teamData[team.teamNumber];
+
+                        if (j != 0) avgOPR += _teamData ? _teamData.quickStats.tot.value : 0;
+
+                        if (j == eventData.teams.length - 1) {
+                            avgOPR /= eventData.teams.length;
+                            console.log(`Average OPR: ${avgOPR}`);
+                        } else if (j == 8) {
+                            console.log(`Top 8 OPR: ${avgOPR / 8}`);
+                        }
 
                         if (_teamData == null) {
                             return (
