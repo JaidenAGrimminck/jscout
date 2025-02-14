@@ -800,6 +800,66 @@ async function run_simulation() {
     console.log("Total correct:", totCorrect);
     console.log("Accuracy:", (totCorrect / totAnalyzed) * 100, "%");
 
+    //analyze accuracy for any event with nl in the code
+    let eventNames = region.events.map(event => event.code);
+    // let nlEvents = eventNames.filter(name => [
+    //     "NLZEQ",
+    //     "NLBLQ",
+    //     "NLHAQ",
+    //     "NLWAQ",
+    //     "NLTHQ"
+    // ].includes(name));
+    //let nlEvents = eventNames.filter(name => name.includes("NL"));
+
+    let events = region.events.filter(event => nlEvents.includes(event.code));
+    let matches = events.map(event => event.matches).flat();
+
+    let totAnalyzedNLCMP = 0;
+    let totCorrectNLCMP = 0;
+
+    for (let match of matches) {
+        if (!match.loaded) {
+            continue;
+        }
+
+        if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
+            totCorrectNLCMP += 1;
+        }
+        if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
+            totCorrectNLCMP += 1;
+        }
+
+        totAnalyzedNLCMP += 1;
+    }
+
+    console.log("Total analyzed NLCMP:", totAnalyzedNLCMP);
+    console.log("Total correct NLCMP:", totCorrectNLCMP);
+    console.log("Accuracy NLCMP:", (totCorrectNLCMP / totAnalyzedNLCMP) * 100, "%");
+
+    // then rpredict accuracy for just 23014
+    let matches23014NLCMP = matches.filter(match => match.red1 === 23014 || match.red2 === 23014 || match.blue1 === 23014 || match.blue2 === 23014);
+    let totAnalyzed23014 = 0;
+    let totCorrect23014 = 0;
+
+    for (let match of matches23014NLCMP) {
+        if (!match.loaded) {
+            continue;
+        }
+
+        if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
+            totCorrect23014 += 1;
+        }
+        if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
+            totCorrect23014 += 1;
+        }
+
+        totAnalyzed23014 += 1;
+    }
+
+    console.log("Total analyzed 23014 NLCMP:", totAnalyzed23014);
+    console.log("Total correct 23014 NLCMP:", totCorrect23014);
+    console.log("Accuracy 23014 NLCMP:", (totCorrect23014 / totAnalyzed23014) * 100, "%");
+
     //exit program
     //process.exit();
 }

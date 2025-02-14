@@ -80,7 +80,7 @@ const schedule = [
         end: [16, 0],
         name: "Pit Visits by Judges",
         location: "Pits",
-        column: 1
+        column: 2
     },
     {
         start: [14, 30],
