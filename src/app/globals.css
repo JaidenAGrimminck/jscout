@@ -3,9 +3,13 @@
   --foreground: #030303;
   --color-red-bg: rgb(255, 238, 238);
   --color-blue-bg: rgb(238, 238, 255);
+  --color-blue-bg-dark: rgb(173, 173, 213);
+  --color-red-bg-dark: rgb(206, 144, 144);
   --color-correct: rgb(134, 207, 163);
   --color-incorrect: rgb(247, 127, 132);
   --color-neutral: rgb(207, 207, 207);
+  --color-blue: #007bff;
+  --color-blue-dark: #0056b3;
 }
 
 @media (prefers-color-scheme: dark) {

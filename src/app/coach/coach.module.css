@@ -1,0 +1,297 @@
+
+.coach-page {
+    padding: 10px;
+}
+
+.coach-entry {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+
+.team-inputs {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+.team-input {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 50px;
+    width: 80%;
+}
+
+.team-input > input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 1.2em;
+}
+
+.team-input > input:first-child {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.team-inputs-button-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin-top: 50px;
+}
+.team-inputs-button-container > button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 1.2em;
+    background-color: var(--color-blue);
+    color: white;
+}
+
+.team-inputs-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    padding-top: 20px;
+}
+
+
+
+.pre-teleop-predictions {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.pre-teleop-predictions > div > p:last-child {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.pre-teleop-predictions > div > p:first-child {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.num-inputs-with-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+.pre-teleop {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+.pre-teleop-predictions-button-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.pre-teleop-predictions-button-container > p {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.num-inputs-with-buttons {
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+}
+
+.ni-neg {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.5em;
+    text-align: center;
+    margin-right: 10px;
+}
+
+.ni-neg:active {
+    background-color: var(--color-blue-dark);
+}
+
+.ni-pos {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.5em;
+    text-align: center;
+    margin-left: 10px;
+}
+
+.ni-pos:active {
+    background-color: var(--color-blue-dark);
+}
+
+.ni-input {
+    font-size: 1.5em;
+    text-align: center;
+    border: 1px solid black;
+    box-shadow: none;
+    padding: 5px 0px;
+    border-radius: 5px;
+}
+
+.pre-teleop-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    padding-top: 20px;
+}
+
+.pre-teleop-connected {
+    margin-top: 20px;
+}
+
+.connected-to-internet {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.connected-to-internet > button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 1.2em;
+    background-color: var(--color-blue);
+    color: white;
+    margin-top: 10px;
+}
+
+.connected-to-internet > button:active {
+    background-color: var(--color-blue-dark);
+}
+
+.pre-teleop-button-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.pre-teleop-button-container > button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid black;
+    font-size: 1.5em;
+    background-color: var(--color-blue);
+    color: white;
+    width: 100%;
+}
+
+.pre-teleop-button-container > button:active {
+    background-color: var(--color-blue-dark);
+}
+
+.teleop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.teleop-division {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.teleop-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+
+    background-color: var(--color-blue-bg);
+    border-bottom: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.teleop-top:active {
+    background-color: var(--color-blue-bg-dark);
+}
+
+.teleop-bottom {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+
+    background-color: var(--color-red-bg);
+    border-top: 2px solid black;
+}
+
+.teleop-bottom:active {
+    background-color: var(--color-red-bg-dark);
+}
+
+.teleop-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: black;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 1.75rem;
+}
+
+
+.teleop-top > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    font-size: 1.5rem;
+}
