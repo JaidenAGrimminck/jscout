@@ -269,6 +269,10 @@
 
     background-color: var(--color-red-bg);
     border-top: 2px solid black;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .teleop-bottom:active {
@@ -295,3 +299,4 @@
     margin-top: 50px;
     font-size: 1.5rem;
 }
+

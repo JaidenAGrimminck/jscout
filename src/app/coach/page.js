@@ -153,12 +153,12 @@ function TeleOp({ topClick, bottomClick }) {
                     <div>
                         <p>Current Cycle Run: <b id="current-lap">0</b> seconds</p>
                         <p>SWITCH AT <b id="switch-time">0:00</b></p>
-                        <p><b id="spec-left">0</b> SPECIMENT LEFT</p>
+                        <p><b id="spec-left">0</b> SPECIMENT LEFT (<b id="max-spec">0</b> spec max)</p>
                     </div>
                 </div>
                 <div className={styles["teleop-bottom"]} onClick={bottomClick}>
                     <p>
-
+                        Time to score all: <b id="score-all">0</b> seconds
                     </p>
                 </div>
             </div>
@@ -189,11 +189,11 @@ export default function Coach() {
         const preTeleOp = document.getElementById("pre-teleop");
         const teleOp = document.getElementById("teleop");
 
-        coachEntry.style.display = "none";
+        coachEntry.style.display = "flex";
         preTeleOp.style.display = "none";
-        teleOp.style.display = "flex";
+        teleOp.style.display = "none";
 
-        onSwitchToTeleop();
+        //onSwitchToTeleop();
     })
 
     const onCoachEntryFinish = async (red1, red2, blue1, blue2) => {
@@ -251,6 +251,7 @@ export default function Coach() {
 
         setInterval(() => {
             document.getElementById("current-lap").textContent = Math.round((new Date().getTime() - lastLap) / 1000 * 100) / 100;
+            document.getElementById("current-time-left").textContent = `${Math.floor((120 - (new Date().getTime() - lastLap) / 1000) / 60)}:${Math.floor((120 - (new Date().getTime() - lastLap) / 1000) % 60)}`;
         })
     }
 
@@ -290,8 +291,14 @@ export default function Coach() {
             }
         }
 
+        let timeAdded = 120 - totalTime;
+
         document.getElementById("spec-left").textContent = max - scoredLaps.length;
-        document.getElementById("switch-time").textContent = `${Math.floor(max * avgCycle / 60)}:${Math.floor(max * avgCycle % 60)}`;
+        document.getElementById("switch-time").textContent = `${Math.floor((max * avgCycle + timeAdded) / 60)}:${Math.floor((max * avgCycle + timeAdded) % 60)}`;
+        document.getElementById("max-spec").textContent = max;
+        document.getElementById("score-all").textContent = Math.floor(avgScore * (max + prescored));
+
+        
     }
 
     const bottomClick = () => {
