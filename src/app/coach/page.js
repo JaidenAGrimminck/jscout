@@ -189,9 +189,19 @@ export default function Coach() {
         const preTeleOp = document.getElementById("pre-teleop");
         const teleOp = document.getElementById("teleop");
 
-        coachEntry.style.display = "flex";
-        preTeleOp.style.display = "none";
-        teleOp.style.display = "none";
+        const query = new URLSearchParams(window.location.search);
+
+        if (query.has("skipEntry")) {
+            coachEntry.style.display = "none";
+            preTeleOp.style.display = "flex";
+            teleOp.style.display = "none";
+        } else {
+            coachEntry.style.display = "flex";
+            preTeleOp.style.display = "none";
+            teleOp.style.display = "none";
+        }
+
+        
 
         //onSwitchToTeleop();
     })
