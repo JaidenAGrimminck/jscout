@@ -38,16 +38,16 @@ function ConnectedToInternet() {
     const checkIfConnected = async () => {
         let req;
         try {
-            req = await fetch(`${getURL()}/v1`);
+            req = await fetch(`https://example.com`);
         } catch (e) {
             document.getElementById("connected").innerText = "No";
             document.getElementById("connected").style.color = "var(--color-incorrect)";
             return;
         }
 
-        const data = await req.json();
+        const data = await req.text();
 
-        if (data["api_version"] == "1.0") {
+        if (data) {
             document.getElementById("connected").innerText = "Yes";
             document.getElementById("connected").style.color = "var(--color-correct)";
         } else {
@@ -253,22 +253,27 @@ export default function Coach() {
 
     let scoredSoFar = 0;
     let lastLap = 0;
+    let timeStart = 0;
     let scoredLaps = [];
 
     const onSwitchToTeleop = () => {
         lastLap = new Date().getTime();
         scoredSoFar = 0;
+        timeStart = new Date().getTime();
 
         setInterval(() => {
             document.getElementById("current-lap").textContent = Math.round((new Date().getTime() - lastLap) / 1000 * 100) / 100;
-            document.getElementById("current-time-left").textContent = `${Math.floor((120 - (new Date().getTime() - lastLap) / 1000) / 60)}:${Math.floor((120 - (new Date().getTime() - lastLap) / 1000) % 60)}`;
+            document.getElementById("current-time-left").textContent = `${Math.floor((120 - (new Date().getTime() - timeStart) / 1000) / 60)}:${Math.floor((120 - (new Date().getTime() - timeStart) / 1000) % 60)}`;
         })
+
+        let prescored = parseInt(document.getElementById("hp-spec").value);
+
+        document.getElementById("spec-count").textContent = scoredSoFar + prescored;
     }
 
     const topClick = () => {
         scoredSoFar++;
-
-        document.getElementById("spec-count").textContent = scoredSoFar;
+        
         scoredLaps.push(
             (new Date().getTime() - lastLap) / 1000
         )
@@ -283,6 +288,9 @@ export default function Coach() {
 
         let totalTime = 108;
         let prescored = parseInt(document.getElementById("hp-spec").value);
+
+
+        document.getElementById("spec-count").textContent = scoredSoFar + prescored;
 
         let avgCycle = sum / scoredLaps.length;
         let avgScore = 5.8;
