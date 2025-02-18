@@ -103,7 +103,7 @@ router.post('/', async (req, res) => {
         
         const epa = getMatch(eventCode, matchId);
 
-        if (epa !== null && Object.keys(epa).includes("predictedWinProbability")) {
+        if (epa != undefined && epa != null && Object.keys(epa).includes("predictedWinProbability")) {
             n_matchData["predicted_red_win_probability"] = 1 - epa.predictedWinProbability;
         } else {
             n_matchData["predicted_red_win_probability"] = 1 - predictMatch(match.teams[0], match.teams[1], match.teams[2], match.teams[3]);
@@ -182,7 +182,7 @@ router.get('/:eventCode/:matchId', async (req, res) => {
         
     const epa = getMatch(eventCode, matchId);
 
-    if (epa !== null && Object.keys(epa).includes("predictedWinProbability")) {
+    if (epa != undefined && epa != null && Object.keys(epa).includes("predictedWinProbability")) {
         n_matchData["predicted_red_win_probability"] = 1 - epa.predictedWinProbability;
     } else {
         n_matchData["predicted_red_win_probability"] = 1 - predictMatch(match.teams[0], match.teams[1], match.teams[2], match.teams[3]);
