@@ -20,11 +20,11 @@ function EventOverview({ eventData }) {
 
         const _teamData = {};
 
-        await eventData.teams.forEach(async (team) => {
-            const req = await fetch(`${getURL()}/v1/teams/${team.teamNumber}`);
-            const data = await req.json();
+        const req = await fetch(`${getURL()}/v1/teams/multi/${eventData.teams.map((team) => team.teamNumber).join(",")}`)
+        const data = await req.json();
 
-            _teamData[team.teamNumber] = data;
+        data.forEach((team) => {
+            _teamData[team.number] = team;
         });
 
         //setTeamData(_teamData);

@@ -253,6 +253,14 @@ export default function Teams({ params }) {
         const req = await fetch(`${getURL()}/v1/teams/${slug}`);
         const data = await req.json();
 
+        let toLoadEvents = [];
+
+        for (let i = 0; i < data.events.length; i++) {
+            toLoadEvents.push(data.events[i].eventCode);
+        }
+        
+        await fetch(`${getURL()}/v1/events/multi/${toLoadEvents.join(",")}`);
+
         setTeamData(data);
     }
 

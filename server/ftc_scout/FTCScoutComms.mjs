@@ -16,6 +16,9 @@ const blank_data = {
     "epa_model": [],
 }
 
+// max number of teams per request
+const maxTeams = 25;
+
 const url = "https://api.ftcscout.org/graphql";
 
 const delay_before_update = 1000 * 60 * 60 * 24 * 7 * 10; // 1 week
@@ -94,6 +97,123 @@ async function getTeam(teamNumber, reload=false) {
 }
 
 /**
+ * Loads a list of teams from the API in a single graphQL request
+ * @param {Array} teamNumbers The team numbers to load
+ * @return {Promise} A promise that resolves with the team data
+ * @throws {Error} If the team numbers are not an array
+ */
+async function getTeams(teams, ignoreFileAccess=false) {
+    if (!Array.isArray(teams)) {
+        throw new Error("teams must be an array");
+    }
+
+    let toLoad = teams;
+    let alreadyLoaded = [];
+
+    while (fileCurrentlyBeingAccessed && !ignoreFileAccess) {
+        await Wait(1);
+    }
+
+    fileCurrentlyBeingAccessed = true;
+
+    loadData();
+
+    await Wait(10);
+
+    Memory.get("teams").forEach(team => {
+        if (toLoad.includes(team["number"])) {
+            toLoad = toLoad.filter(teamNumber => teamNumber !== team["number"]);
+            alreadyLoaded.push(team["number"]);
+        }
+    });
+
+    console.log("to load / ", toLoad.length, "already loaded / ", alreadyLoaded.length);
+
+
+    if (toLoad.length === 0) {
+        fileCurrentlyBeingAccessed = false;
+
+        //console.log(teams);
+
+        return Memory.get("teams").filter(team => toLoad.includes(team["number"]) || alreadyLoaded.includes(team["number"]));
+    }
+
+    let otherReqs = [];
+
+    console.log(toLoad, teams);
+
+    for (let i = 0; i < toLoad.length; i += maxTeams) {
+        otherReqs.push([]);
+        for (let j = i; j < i + maxTeams && j < toLoad.length; j++) {
+            otherReqs[otherReqs.length - 1].push(toLoad[j]);
+        }
+    }
+
+    toLoad = otherReqs[0];
+
+    if (otherReqs.length > 1) {
+        console.log("splitting teams into", otherReqs.length, "requests");
+
+        for (let j = 1; j < otherReqs.length; j++) {
+            console.log("requesting", otherReqs[j].length, "teams");
+            await getTeams(otherReqs[j], true);
+        }
+    }
+
+    let r = fs.readFileSync(path.join(__dirname, "/team_request.gql"), "utf-8");
+    // only do not the first line or the last line
+    r = r.split("\n").filter((line, index) => {
+        return index !== 0 && index !== r.split("\n").length - 1;
+    });
+
+    r = r.join("\n").replaceAll("{{season}}", 2024).replaceAll("{{SEASON}}", 2024);
+
+    let req = "{\n";
+
+    console.log("requesting # of teams", toLoad.length);
+
+    for (let team of toLoad) {
+        if (team === undefined || typeof team === "undefined") {
+            console.log("team is undefined");
+            continue;
+        }
+        if (team === null) {
+            console.log("team is null");
+            continue;
+        }
+
+        req = req.concat(`\tteam${team}: ${r.replaceAll("{{teamNumber}}", team)}`);
+    }
+    req = req.concat("\n}");
+    req = gql`${req}`;
+
+    
+    const q = await request(url, req);
+
+    //console.log(Object.keys(q));
+
+    const newData = Object.values(q).map(team => {
+        return Object.assign(team, {
+            last_updated: new Date().getTime()
+        });
+    });
+
+    const currentTeams = Memory.get("teams");
+    currentTeams.push(...newData);
+    Memory.set("teams", currentTeams);
+    console.log("added teams " + toLoad.join(", ") + " to memory");
+    await Wait(10);
+    saveData(false);
+
+
+    await Wait(10);
+    loadData();
+    console.log("loaded teams " + toLoad.join(", ") + " into memory");
+    fileCurrentlyBeingAccessed = false;
+    return Memory.get("teams").filter(team => teams.includes(team["number"]));
+}
+
+/**
  * Gets the event data for an event code
  * @param {String} eventCode The event code to get data for
  * @return {Promise} A promise that resolves with the event data
@@ -154,6 +274,86 @@ async function getEvent(eventCode, reload=false) {
     fileCurrentlyBeingAccessed = false;
 
     return event;
+}
+
+/**
+ * Gets the event data for an array of event codes using a multi graphql request
+ * @param {Array} eventCode The event code to get data for
+ * @return {Promise} A promise that resolves with the event data
+ */
+async function getEvents(eventCode) {
+    if (!Array.isArray(eventCode)) {
+        throw new Error("eventCode must be an array");
+    }
+
+    let toLoad = eventCode;
+    let alreadyLoaded = [];
+
+    while (fileCurrentlyBeingAccessed) {
+        await Wait(1);
+    }
+
+    fileCurrentlyBeingAccessed = true;
+
+    loadData();
+    Memory.get("events").forEach(event => {
+        if (toLoad.includes(event["code"])) {
+            toLoad = toLoad.filter(eventCode => eventCode !== event["code"]);
+            alreadyLoaded.push(event["code"]);
+        }
+    });
+
+    if (toLoad.length === 0) {
+        fileCurrentlyBeingAccessed = false;
+        return Memory.get("events").filter(event => toLoad.includes(event["code"]) || alreadyLoaded.includes(event["code"]));
+    }
+
+    let r = fs.readFileSync(path.join(__dirname, "/event_request.gql"), "utf-8");
+    // only do not the first line or the last line
+    r = r.split("\n").filter((line, index) => {
+        return index !== 0 && index !== r.split("\n").length - 1;
+    });
+
+    r = r.join("\n").replaceAll("{{season}}", 2024).replaceAll("{{SEASON}}", 2024);;
+
+    let req = "{\n";
+
+    console.log("requesting # of events", toLoad.length);
+
+    for (let event of toLoad) {
+        req = req.concat(`\t${event}: ${r.replaceAll("{{EVENT_CODE}}", event)}`);
+    }
+    req = req.concat("\n}");
+    req = gql`${req}`;
+    
+    const q = await request(url, req);
+
+    const newData = Object.values(q).map(event => {
+        return Object.assign(event, {
+            last_updated: new Date().getTime()
+        });
+    });
+
+    const currentEvents = Memory.get("events");
+    currentEvents.push(...newData);
+    Memory.set("events", currentEvents);
+    
+    console.log("added events " + toLoad.join(", ") + " to memory");
+    
+    await Wait(10);
+    
+    saveData(false);
+
+    
+    await Wait(10);
+    
+    loadData();
+    
+    console.log("loaded events " + toLoad.join(", ") + " into memory");
+    
+    fileCurrentlyBeingAccessed = false;
+    
+    return Memory.get("events").filter(event => toLoad.includes(event["code"]) || alreadyLoaded.includes(event["code"]));
 }
 
 async function updateTeam(teamNumber, season=2024) {
@@ -451,4 +651,4 @@ function getLoadedTeams() {
     return team_date_pair;
 }
 
-export { getTeam, getLoadedTeams, getEvent, getLoadedEvents, getMemory, saveToMemory, pruneMemory, saveData };
+export { getTeam, getLoadedTeams, getEvent, getLoadedEvents, getMemory, saveToMemory, pruneMemory, saveData, getTeams, getEvents };

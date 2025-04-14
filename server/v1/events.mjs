@@ -1,5 +1,5 @@
 import express from "express";
-import { getEvent, getLoadedEvents } from "../ftc_scout/FTCScoutComms.mjs";
+import { getEvent, getEvents, getLoadedEvents } from "../ftc_scout/FTCScoutComms.mjs";
 import bodyParser from "body-parser";
 
 const router = express.Router();
@@ -9,6 +9,37 @@ router.use(bodyParser.json());
 
 router.get('/', async (req, res) => {
     res.json(getLoadedEvents());
+})
+
+router.get("/multi/:eventCodes", async (req, res) => {
+    const eventCodes = req.params.eventCodes.split(",");
+
+    if (eventCodes.some(isNaN)) {
+        res.status(400).json({
+            "error": "eventCodes must be a comma separated list of strings, not " + req.params.eventCodes
+        });
+
+        return;
+    }
+
+    let eventData = await getEvents(eventCodes);
+    if (eventData === null) {
+        res.status(404).json({
+            "error": "Event not found"
+        });
+        return;
+    }
+
+    for (let i = 0; i < eventData.length; i++) {
+        if (eventData[i] === null) {
+            res.status(404).json({
+                "error": "Some event not found"
+            });
+            return;
+        }
+    }
+
+    res.json(eventData);
 })
 
 router.get('/:eventCode', async (req, res) => {

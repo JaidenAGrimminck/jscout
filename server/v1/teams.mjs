@@ -1,5 +1,5 @@
 import express from "express";
-import { getTeam, getLoadedTeams, getEvent } from "../ftc_scout/FTCScoutComms.mjs";
+import { getTeam, getLoadedTeams, getEvent, getTeams } from "../ftc_scout/FTCScoutComms.mjs";
 import bodyParser from "body-parser";
 import { getEPATeam } from "../ftc_scout/epa/EPA.mjs";
 
@@ -10,6 +10,30 @@ router.use(bodyParser.json());
 
 router.get('/', async (req, res) => {
     res.json(getLoadedTeams());
+})
+
+router.get('/multi/:teamNumbers', async (req, res) => {
+    const teamNumbers = req.params.teamNumbers.split(",").map(Number);
+
+    if (teamNumbers.some(isNaN)) {
+        res.status(400).json({
+            "error": "teamNumbers must be a comma separated list of numbers, not " + req.params.teamNumbers
+        });
+
+        return;
+    }
+
+    let teamData = await getTeams(teamNumbers);
+
+    for (let i = 0; i < teamData.length; i++) {
+        let epa = getEPATeam(teamNumbers[i]);
+
+        if (epa !== null) {
+            teamData[i]["epa"] = epa;
+        }
+    }
+    
+    res.json(teamData);
 })
 
 router.get('/:teamNumber', async (req, res) => {

@@ -1,10 +1,69 @@
-import { getEvent, getLoadedEvents, getLoadedTeams, getTeam } from "../FTCScoutComms.mjs";
+import { getLoadedEvents, getLoadedTeams
+    //, getEvent, getTeam, getTeams, getEvents 
+} from "../FTCScoutComms.mjs";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
+
+//__dirname fix: https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Calculations based on the following paper:
  * https://www.statbotics.io/blog/epa
  */
+
+// comment out if no data is loaded.
+
+const data_location = path.join(__dirname, "/../data.json");
+let dataIntoMem = {
+    t: JSON.parse(fs.readFileSync(data_location))
+}
+
+let _d = {};
+let _e = {};
+
+function formatData() {
+    for (let team of dataIntoMem.t.teams) {
+        _d[team.number] = team;
+    }
+
+    for (let event of dataIntoMem.t.events) {
+        _e[event.code] = event;
+    }
+
+    // garbage collect dataIntoMem
+    delete dataIntoMem.t;
+}
+
+function getTeam(team) {
+    return _d[team];
+}
+
+function getTeams(teams) {
+    let ts = [];
+    for (let t of teams) {
+        ts.push(_d[t]);
+    }
+    return ts;
+}
+
+function getEvent(event) {
+    return _e[event];
+}
+
+function getEvents(events) {
+    let es = [];
+    for (let e of events) {
+        es.push(_d[e]);
+    }
+    return es;
+}
+
+formatData();
+
+//end local
 
 class Team {
     constructor(teamNumber) {
@@ -23,18 +82,18 @@ class Team {
     }
     getK() {
         if (this.matches <= 2) {
-            return 0.5;
+            return 0.4;
         } else if (this.matches > 2 && this.matches <= 8) {
-            return 0.5 - ((1/30) * (this.matches - 2));
+            return 0.4 - ((1/30) * (this.matches - 2));
         } else {
-            return 0.3;
+            return 0.2;
         }
     }
     getM() {
-        if (this.matches <= 6) {
+        if (this.matches <= 4) {
             return 0;
-        } else if (this.matches > 4 && this.matches <= 12) {
-            return (1/24) * (this.matches - 4);
+        } else if (this.matches > 4 && this.matches <= 10) {
+            return (1/6) * (this.matches - 4);
         } else {
             return 1;
         }
@@ -126,6 +185,10 @@ class Match {
             throw new Error("Region not loaded!");
         }
 
+        //console.log(Region.Instance.getTeam(this.red2), this.red2, Region.Instance.teams)
+
+        //console.log(this.red1, this.red2, this.blue1, this.blue2);
+
         let red1elo = Region.Instance.getTeam(this.red1).elo;
         let red2elo = Region.Instance.getTeam(this.red2).elo;
         let blue1elo = Region.Instance.getTeam(this.blue1).elo;
@@ -185,6 +248,8 @@ class Event {
 
 class Region {
     static Instance = null;
+
+    static init_analysis = 50;
 
     static fromJSON(json) {
         let region = new Region();
@@ -260,7 +325,7 @@ class Region {
         let t = 0;
         let c = 0;
         
-        for (let i = 0; i < (5 > matches.length ? matches.length : 5); i++) {
+        for (let i = 0; i < Math.min(matches.length, Region.init_analysis); i++) {
             let match = matches[i];
 
             if (match.loaded) {
@@ -278,7 +343,7 @@ class Region {
         let t = 0;
         let c = 0;
 
-        for (let i = 0; i < (5 > matches.length ? matches.length : 5); i++) {
+        for (let i = 0; i < Math.min(matches.length, Region.init_analysis); i++) {
             let match = matches[i];
 
             if (match.loaded) {
@@ -296,7 +361,7 @@ class Region {
         let t = 0;
         let c = 0;
 
-        for (let i = 0; i < (5 > matches.length ? matches.length : 5); i++) {
+        for (let i = 0; i < Math.min(matches.length, Region.init_analysis); i++) {
             let match = matches[i];
 
             if (match.loaded) {
@@ -314,7 +379,7 @@ class Region {
         let t = 0;
         let c = 0;
 
-        for (let i = 0; i < (5 > matches.length ? matches.length : 5); i++) {
+        for (let i = 0; i < Math.min(matches.length, Region.init_analysis); i++) {
             let match = matches[i];
 
             if (match.loaded) {
@@ -343,7 +408,7 @@ class Region {
     }
 }
 
-const championship_event = "NLCMP";
+const championship_event = "FTCCMP1FRAN";
 
 async function run_simulation() {
     let region = new Region();
@@ -354,7 +419,9 @@ async function run_simulation() {
     const loadingVerbose = false;
     const remakeFile = false;
     const stillFillOutMatches = false;
-    const stopLikeAllMessages = true;
+    const stopLikeAllMessages = false;
+
+    let nonCMPEvents = [];
 
     const loadTeam = async (teamNumber) => {
         if (teamsLoading.includes(teamNumber)) {
@@ -384,6 +451,173 @@ async function run_simulation() {
         }
     }
 
+    const loadTeams = async (teamNumbers) => {
+
+        let toLoad = [];
+        
+        for (let teamNumber of teamNumbers) {
+            if (teamsLoading.includes(teamNumber)) {
+                continue;
+            }
+
+            if (region.teams.find(team => team.teamNumber === teamNumber) !== undefined) {
+                continue;
+            }
+            if (teamNumber == undefined) {
+                continue;
+            }
+
+            toLoad.push(teamNumber);
+            teamsLoading.push(teamNumber);
+        }
+
+        if (toLoad.length == 0) {
+            return;
+        }
+
+        //console.log(toLoad)
+
+        await getTeams(toLoad);
+
+        // this is added to memory, so we can just skip and 
+        // not worry about loading them again
+        for (let teamNumber of toLoad) {
+            let team = new Team(teamNumber);
+            team.loaded = true;
+
+            region.teams.push(team);
+            let team_data = await getTeam(teamNumber);
+            if (team_data == undefined || team_data.events == undefined) {
+                if (loadingVerbose) console.log("No events found for team " + teamNumber);
+                continue;
+            }
+
+            let eventCodes = [];
+
+            for (let event of team_data.events) {
+                eventCodes.push(event.eventCode);
+            }
+
+            await loadEvents(eventCodes);
+        }
+    }
+        
+    const loadEvents = async (eventCodes) => {
+        let toLoad = [];
+        for (let eventCode of eventCodes) {
+            if (eventsLoading.includes(eventCode)) {
+                continue;
+            }
+
+            if (region.getEvent(eventCode) !== null) {
+                continue;
+            }
+
+            if (nonCMPEvents.includes(eventCode)) {
+                continue;
+            }
+
+            if (!eventCode.includes("CMP")) {
+                nonCMPEvents.push(eventCode);
+                //console.log("skipping non cmp event " + eventCode);
+                continue;
+            }
+
+            eventsLoading.push(eventCode);
+            toLoad.push(eventCode);
+        }
+
+        let events = await getEvents(eventCodes);
+        // this is added to memory, so we can just skip and
+        // not worry about loading them again
+
+        for (let event of events) {
+            if (event.type != "Championship" && event.type != "FIRSTChampionship") {
+                //console.log("Skipping event " + event.code + " because it is not a championship event (or is general event)");
+                nonCMPEvents.push(event.code);
+                continue;
+            }
+
+            let new_event = new Event(event.code, event.start, event.end, event.type);
+            region.events.push(new_event);
+            if (region.events.length % 10 == 0) {
+                console.log("Loaded", region.events.length, "events!");
+            }
+
+            if (event == undefined || event.matches == undefined) {
+                if (loadingVerbose) console.log("No matches found for event " + event.code + "?");
+                continue;
+            }
+
+            let eventParticipatingTeams = [];
+            if (event.matches.length > 0) {
+                for (let match of event.matches) {
+                    let blueAlliance = [];
+                    let redAlliance = [];
+
+                    for (let team of match.teams) {
+                        if (team.alliance.toLowerCase() == "red") {
+                            redAlliance.push(team.teamNumber);
+                        } else {
+                            blueAlliance.push(team.teamNumber);
+                        }
+                    }
+
+                    new_event.matches.push(
+                        new Match(
+                            match.id,
+                            match.actualStartTime,
+                            match.hasBeenPlayed,
+                            redAlliance[0],
+                            redAlliance[1],
+                            blueAlliance[0],
+                            blueAlliance[1]
+                        )
+                    );
+
+                    let pre = eventParticipatingTeams.length + 1 - 1;
+
+                    for (let team of redAlliance) {
+                        eventParticipatingTeams.push(team);
+                    }
+
+                    for (let team of blueAlliance) {
+                        eventParticipatingTeams.push(team);
+                    }
+
+                    // console.log(redAlliance, blueAlliance)
+
+                    // console.log(eventParticipatingTeams)
+
+                    // console.log(eventParticipatingTeams.length - pre, eventParticipatingTeams.length);
+                }
+
+                // remove any repeat teams
+                let teams = [];
+                for (let team of eventParticipatingTeams) {
+                    if (!teams.includes(team)) {
+                        teams.push(team);
+                        //console.log("pushing",teams.length)
+                    }
+                }
+
+                //console.log("loading " + teams.length + " teams for event " + event.code);
+
+                await loadTeams(teams);
+            } else {
+                if (loadingVerbose) console.log("No matches found for event " + event.code + ", loading teams...");
+                let tnums = [];
+
+                for (let team of event.teams) {
+                    tnums.push(team.teamNumber);
+                }
+
+                await loadTeams(tnums);
+            }
+
+        }
+    };
+
     const loadEvent = async (code) => {
         if (eventsLoading.includes(code)) {
             return;
@@ -392,11 +626,22 @@ async function run_simulation() {
             return;
         }
 
+        if (nonCMPEvents.includes(code)) {
+            return;
+        }
+
         eventsLoading.push(code);
 
         if (loadingVerbose) console.log("Loading event " + code);
 
         let event = await getEvent(code);
+
+        if ((event.type != "Championship" && event.type != "FIRSTChampionship") || (code == "FTCCMP1")) {
+            //console.log("Skipping event " + code + " because it is not a championship event (or is general event)");
+            nonCMPEvents.push(code);
+            return;
+        } 
+
         let new_event = new Event(code, event.start, event.end, event.type);
 
         region.events.push(new_event);
@@ -409,6 +654,8 @@ async function run_simulation() {
             if (loadingVerbose) console.log("No matches found for event " + code + "?");
             return;
         }
+
+        let eventParticipatingTeams = [];
 
         if (event.matches.length > 0) {
             for (let match of event.matches) {
@@ -436,30 +683,38 @@ async function run_simulation() {
                 );
 
                 for (let team of redAlliance) {
-                    await loadTeam(team);
+                    eventParticipatingTeams.push(team.teamNumber);
                 }
 
                 for (let team of blueAlliance) {
-                    await loadTeam(team);
+                    eventParticipatingTeams.push(team.teamNumber);
                 }
             }
+
+            await loadTeams(eventParticipatingTeams);
         } else {
             if (loadingVerbose) console.log("No matches found for event " + code + ", loading teams...");
+            let tnums = [];
+
             for (let team of event.teams) {
-                await loadTeam(team.teamNumber);
+                tnums.push(team.teamNumber);
             }
+
+            await loadTeams(tnums);
         }
     }
 
     if (!stopLikeAllMessages) console.log("Loading teams...");
     let startTime = new Date().getTime();
 
+    console.log("region file exists? ", fs.existsSync("region.json"));
+
     //check if there's a region.json file
     if (fs.existsSync("region.json") && !remakeFile) {
         region = JSON.parse(fs.readFileSync("region.json"));
         region = Region.fromJSON(region);
     } else {
-        await loadEvent(championship_event);
+        await loadEvents([championship_event]);
     }
 
     let endTime = new Date().getTime();
@@ -653,7 +908,16 @@ async function run_simulation() {
         console.log("Auto / DC / EG:", week1AutoScore, week1DCScore, week1EGScore);
     }
 
+    let totalMatches = 0;
+    for (let event of region.events) {
+        totalMatches += event.matches.length;
+    }
+
+    console.log("Total matches:", totalMatches);
+
     let i = 0;
+
+    let goneThru = 0;
 
     for (let event of region.events) {
         const isUnofficial = event.type === "Scrimmage";
@@ -688,21 +952,34 @@ async function run_simulation() {
             match.epa.blue.dc = blue1.epa.dc + blue2.epa.dc;
             match.epa.blue.eg = blue1.epa.eg + blue2.epa.eg;
 
+            //tested values: 0.0035 - 60.53
+            //0.005 - 60.71
+            //0.006 - 60.84
+            //0.007 - 61.00
+            //0.008 - 60.98
+            //0.0075 - 60.93
+            //0.0069 - 60.93
+
+
             // elo calculations
-            let predScoreMargin = 0.0035 * ((red1.elo + red2.elo) - (blue1.elo + blue2.elo));
+            let predScoreMargin = 0.00695 * ((red1.elo + red2.elo) - (blue1.elo + blue2.elo));
 
             let actualScoreMargin = (match.redScore - match.blueScore) / (region.getScoreStandardDeviation() * 1);
 
             let isQual = match.id < 1000;
 
-            let K = isQual ? 12 : 3;
+            let avgMatchN = (red1.matches + red2.matches + blue1.matches + blue2.matches);
+
+            let K = isQual ? Math.max(5 + ((1/4) * -avgMatchN), 4) : 4;
 
             let deltaR = K * (actualScoreMargin - predScoreMargin);
 
-            red1.elo += deltaR * (isUnofficial ? 0.5 : 1);
-            red2.elo += deltaR * (isUnofficial ? 0.5 : 1);
-            blue1.elo -= deltaR * (isUnofficial ? 0.5 : 1);
-            blue2.elo -= deltaR * (isUnofficial ? 0.5 : 1);
+            let aggrValue = 3;
+
+            red1.elo += deltaR * (isUnofficial ? 0.5 : aggrValue);
+            red2.elo += deltaR * (isUnofficial ? 0.5 : aggrValue);
+            blue1.elo -= deltaR * (isUnofficial ? 0.5 : aggrValue);
+            blue2.elo -= deltaR * (isUnofficial ? 0.5 : aggrValue);
 
             // epa calculations
 
@@ -752,8 +1029,19 @@ async function run_simulation() {
             }
 
             i++;
+
+            goneThru++;
+
+            if (goneThru % 100 == 0) {
+                console.log("Gone through", goneThru, `matches! (${Math.round(goneThru / totalMatches * 10000) / 100}%)`);
+            }
         }
     }
+
+    // save region to file
+    fs.writeFileSync("regiondata.json", JSON.stringify(region, null, 4));
+
+    console.log("Finished loading matches!");
 
     let totAnalyzed = 0;
     let totCorrect = 0;
@@ -811,60 +1099,64 @@ async function run_simulation() {
     // ].includes(name));
     //let nlEvents = eventNames.filter(name => name.includes("NL"));
 
-    let events = region.events.filter(event => nlEvents.includes(event.code));
-    let matches = events.map(event => event.matches).flat();
+    // let events = region.events.filter(event => nlEvents.includes(event.code));
+    // let matches = events.map(event => event.matches).flat();
 
-    let totAnalyzedNLCMP = 0;
-    let totCorrectNLCMP = 0;
+    // let totAnalyzedNLCMP = 0;
+    // let totCorrectNLCMP = 0;
 
-    for (let match of matches) {
-        if (!match.loaded) {
-            continue;
-        }
+    // for (let match of matches) {
+    //     if (!match.loaded) {
+    //         continue;
+    //     }
 
-        if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
-            totCorrectNLCMP += 1;
-        }
-        if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
-            totCorrectNLCMP += 1;
-        }
+    //     if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
+    //         totCorrectNLCMP += 1;
+    //     }
+    //     if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
+    //         totCorrectNLCMP += 1;
+    //     }
 
-        totAnalyzedNLCMP += 1;
-    }
+    //     totAnalyzedNLCMP += 1;
+    // }
 
-    console.log("Total analyzed NLCMP:", totAnalyzedNLCMP);
-    console.log("Total correct NLCMP:", totCorrectNLCMP);
-    console.log("Accuracy NLCMP:", (totCorrectNLCMP / totAnalyzedNLCMP) * 100, "%");
+    // console.log("Total analyzed NLCMP:", totAnalyzedNLCMP);
+    // console.log("Total correct NLCMP:", totCorrectNLCMP);
+    // console.log("Accuracy NLCMP:", (totCorrectNLCMP / totAnalyzedNLCMP) * 100, "%");
 
-    // then rpredict accuracy for just 23014
-    let matches23014NLCMP = matches.filter(match => match.red1 === 23014 || match.red2 === 23014 || match.blue1 === 23014 || match.blue2 === 23014);
-    let totAnalyzed23014 = 0;
-    let totCorrect23014 = 0;
+    // // then rpredict accuracy for just 23014
+    // let matches23014NLCMP = matches.filter(match => match.red1 === 23014 || match.red2 === 23014 || match.blue1 === 23014 || match.blue2 === 23014);
+    // let totAnalyzed23014 = 0;
+    // let totCorrect23014 = 0;
 
-    for (let match of matches23014NLCMP) {
-        if (!match.loaded) {
-            continue;
-        }
+    // for (let match of matches23014NLCMP) {
+    //     if (!match.loaded) {
+    //         continue;
+    //     }
 
-        if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
-            totCorrect23014 += 1;
-        }
-        if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
-            totCorrect23014 += 1;
-        }
+    //     if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
+    //         totCorrect23014 += 1;
+    //     }
+    //     if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
+    //         totCorrect23014 += 1;
+    //     }
 
-        totAnalyzed23014 += 1;
-    }
+    //     totAnalyzed23014 += 1;
+    // }
 
-    console.log("Total analyzed 23014 NLCMP:", totAnalyzed23014);
-    console.log("Total correct 23014 NLCMP:", totCorrect23014);
-    console.log("Accuracy 23014 NLCMP:", (totCorrect23014 / totAnalyzed23014) * 100, "%");
+    // console.log("Total analyzed 23014 NLCMP:", totAnalyzed23014);
+    // console.log("Total correct 23014 NLCMP:", totCorrect23014);
+    // console.log("Accuracy 23014 NLCMP:", (totCorrect23014 / totAnalyzed23014) * 100, "%");
 
     //exit program
     //process.exit();
 }
 
 function getMatch(eventCode, id) {
+    if (Region.Instance == null) {
+        return null;
+    }
+
     let event = Region.Instance.getEvent(eventCode);
 
     if (event == null) {
@@ -875,6 +1167,10 @@ function getMatch(eventCode, id) {
 }
 
 function getEPATeam(teamNumber) {
+    if (Region.Instance == null) {
+        return null;
+    }
+
     return Region.Instance.getTeam(teamNumber);
 }
 

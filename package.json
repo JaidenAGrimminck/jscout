@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "server": "node --env-file=.env server/Server.js",
     "start": "PORT=3474 next start",
     "lint": "next lint"
   },
@@ -14,7 +15,7 @@
     "express": "^4.21.2",
     "graphql": "^16.10.0",
     "graphql-request": "^7.1.2",
-    "next": "15.1.5",
+    "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
