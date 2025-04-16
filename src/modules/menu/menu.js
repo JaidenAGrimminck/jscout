@@ -108,12 +108,9 @@ function Menu() {
                 <div style={{marginLeft: "30px"}}></div>
 
                 <MenuItem title="Teams" href="/teams" />
-                { window.innerWidth > 800 &&
-                <>
+
                 <MenuItem title="Events" href="/events" />
-                <MenuItem title="Schedule" href="/schedule" />
-                </>
-                }
+                {/* <MenuItem title="Schedule" href="/schedule" /> */}
             </div>
             <div className={styles["menu-division"]}>
                 <MenuItem title="Predict" href="/predict" />
