@@ -1,0 +1,38 @@
+
+.notice {
+    background-color: rgb(255, 255, 209);
+    border: 1px solid rgb(229, 229, 229);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.notice {
+    width: 500px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.notice h1 {
+    font-size: 1.2em;
+    margin: 0;
+
+    font-weight: bold;
+}
+
+.notice h2 {
+    font-size: 1.1em;
+    margin: 0;
+
+    font-weight: bold;
+}
+
+.notice p {
+    margin-top: 10px;
+    font-size: 1em;
+    margin: 0;
+}
+
+.notice a {
+    color: rgb(0, 0, 255);
+    text-decoration: underline;
+}

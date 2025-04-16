@@ -8,6 +8,7 @@ import DateToReadable from "@/modules/misc/DateToReadable";
 import EventMatches from "@/modules/matches/EventMatch";
 import Link from "next/link";
 import getURL from "@/modules/server/Server";
+import { Notice } from "@/modules/notice/Notice.mjs";
 
 const numTeams = 6808;
 
@@ -276,6 +277,19 @@ export default function Teams({ params }) {
         <div>
             <Menu></Menu>
             <div className={styles.page}>
+                <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <Notice>
+                        <h1 className="bold">Warning Notice</h1>
+                        <p>Due to the large data complexity with Worlds, the dataset is currently restricted to <span style={{ fontWeight: "bold" }}>championships</span> and <span style={{ fontWeight: "bold" }}>FIRST World Championship</span>. Thank you for your understanding.</p> <br/>
+                        <p>Additionally, the website is better suited for <span style={{ fontWeight: "bold" }}>laptop</span>.</p>
+                    </Notice>
+                </div>
+
                 <div className={styles["team-header"]}>
                     <p>Team {slug}</p>
                     <p>{teamData && teamData.name}</p>

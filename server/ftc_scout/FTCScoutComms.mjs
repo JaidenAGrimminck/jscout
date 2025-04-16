@@ -396,12 +396,20 @@ async function updateEvent(eventCode, season=2024) {
     }
 }
 
+const querydown = true;
+
 /**
  * Queries the FTC Scout API for team data
  * @param {Object} query The query to send to the API
  * @returns {Promise} A promise that resolves when the data is saved
  */
 function queryTeamData(query) {
+    if (querydown) {
+        return new Promise((resolve, reject) => {
+            reject("API is down");
+        });
+    }
+    
     return new Promise((resolve, reject) => {
         request(url, query).then(async data => {
             const newData = Object.assign(data["teamByNumber"], {

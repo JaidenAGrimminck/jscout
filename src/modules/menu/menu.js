@@ -49,6 +49,11 @@ function MenuSearchbar(props) {
         setTeamData(data);
     }
 
+    const onSearch = async (e) => {
+        const query = e.target.value;
+        router.push(`/teams/${query}`);
+    }
+
     React.useEffect(() => {
         loadFromBackend();
     }, []);
@@ -75,6 +80,12 @@ function MenuSearchbar(props) {
                     placeholder="Search..." 
                     onFocus={handleFocus} 
                     onChange={handleInputChange}
+                    // on search/enter/etc
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            onSearch(e);
+                        }
+                    }}
                 />
                 {isDropdownVisible && (
                     <div className={styles["menu-searchbar-dropdown"]}>
@@ -97,8 +108,12 @@ function Menu() {
                 <div style={{marginLeft: "30px"}}></div>
 
                 <MenuItem title="Teams" href="/teams" />
+                { window.innerWidth > 800 &&
+                <>
                 <MenuItem title="Events" href="/events" />
                 <MenuItem title="Schedule" href="/schedule" />
+                </>
+                }
             </div>
             <div className={styles["menu-division"]}>
                 <MenuItem title="Predict" href="/predict" />

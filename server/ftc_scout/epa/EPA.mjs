@@ -180,8 +180,8 @@ class Match {
         }
     }
 
-    winProbability() {
-        if (Region.Instance == null) {
+    winProbability(elo1, elo2, elob1, elob2) {
+        if (Region.Instance == null && (elo1 == null || elo2 == null || elob1 == null || elob2 == null)) {
             throw new Error("Region not loaded!");
         }
 
@@ -189,10 +189,10 @@ class Match {
 
         //console.log(this.red1, this.red2, this.blue1, this.blue2);
 
-        let red1elo = Region.Instance.getTeam(this.red1).elo;
-        let red2elo = Region.Instance.getTeam(this.red2).elo;
-        let blue1elo = Region.Instance.getTeam(this.blue1).elo;
-        let blue2elo = Region.Instance.getTeam(this.blue2).elo;
+        let red1elo = elo1 || Region.Instance.getTeam(this.red1).elo;
+        let red2elo = elo2 || Region.Instance.getTeam(this.red2).elo;
+        let blue1elo = elob1 || Region.Instance.getTeam(this.blue1).elo;
+        let blue2elo = elob2 || Region.Instance.getTeam(this.blue2).elo;
 
         const winProb = this._winProbability(red1elo, red2elo, blue1elo, blue2elo) * 100;
 
@@ -883,7 +883,13 @@ async function run_simulation() {
         if (!stopLikeAllMessages) console.log("All matches loaded!");
     }
 
-    fs.writeFileSync("region.json", JSON.stringify(region, null, 4));
+    //fs.writeFileSync("region.json", JSON.stringify(region, null, 4));
+
+    if (true) {
+        let r = processEvents(Region.Instance);
+        fs.writeFileSync("regiondata_cld.json", JSON.stringify(r, null, 4));
+        return;
+    }
 
     region.sortEventsByDate();
     if (!stopLikeAllMessages) console.log("Sorted events by date!");
@@ -1238,10 +1244,333 @@ async function predictTeamForEvent(my_team, eventCode) {
     console.log(teamNames.join("\n"));
 }
 
-run_simulation();
+//run_simulation();
+
+function analyzeRegionAccuracy(region) {
+    let totAnalyzed = 0;
+    let totCorrect = 0;
+
+    for (let event of region.events) {
+        for (let match of event.matches) {
+            if (!match.loaded) {
+                //console.log("Match", match.id, "not loaded!");
+                continue;
+            }
+
+            if (match.redScore >= match.blueScore && (1 - match.predictedWinProbability) > 0.5) {
+                totCorrect += 1;
+            }
+            if (match.blueScore >= match.redScore && match.predictedWinProbability > 0.5) {
+                totCorrect += 1;
+            }
+
+            totAnalyzed += 1;
+        }
+    }
+
+    console.log("Total analyzed:", totAnalyzed);
+    console.log("Total correct:", totCorrect);
+    console.log("Accuracy:", (totCorrect / totAnalyzed) * 100, "%");
+}
+/**
+ * Processes all events and matches to calculate team ratings and match predictions
+ * Targeted for 70-80% prediction accuracy
+ * @param {Region} region - The region containing events and teams
+ * @param {boolean} stopLikeAllMessages - Whether to suppress console logs
+ * @returns {Region} - The updated region
+ */
+function processEvents(region, stopLikeAllMessages = false) {
+    // Sort events chronologically
+    region.sortEventsByDate();
+    if (!stopLikeAllMessages) console.log("Sorted events by date!");
+
+    // Calculate initial averages for baseline performance
+    const week1Score = region.getAverageWeek1Score();
+    const week1AutoScore = region.getAverageWeek1AutoScore();
+    const week1DCScore = region.getAverageWeek1DCScore();
+    const week1EGScore = region.getAverageWeek1EGScore();
+
+    // Initialize team EPA values
+    for (let team of region.teams) {
+        team.epa.tot = week1Score / 2; // Each team gets half the alliance average
+        team.epa.auto = week1AutoScore / 2;
+        team.epa.dc = week1DCScore / 2;
+        team.epa.eg = week1EGScore / 2;
+    }
+
+    // Reset Elo ratings to starting value
+    region.resetElo();
+    if (!stopLikeAllMessages) {
+        console.log("Reset ELO!");
+        console.log("current standard deviation:", region.getScoreStandardDeviation());
+        console.log("Auto / DC / EG:", week1AutoScore, week1DCScore, week1EGScore);
+    }
+
+    // Count total matches for progress tracking
+    let totalMatches = 0;
+    for (let event of region.events) {
+        totalMatches += event.matches.length;
+    }
+    console.log("Total matches:", totalMatches);
+
+    let processedMatches = 0;
+
+    // Process each event chronologically
+    for (let event of region.events) {
+        const isUnofficial = event.type === "Scrimmage";
+        event.sortMatches();
+
+        // Process each match within the event
+        for (let match of event.matches) {
+            if (!match.loaded) {
+                if (!stopLikeAllMessages) console.log("Match", match.id, "not loaded!");
+                continue;
+            }
+
+            if (match.type == "Scrimmage") {
+                continue;
+            }
+
+            // Calculate and store predicted win probability
+            match.predictedWinProbability = 1 - calculateWinProbability(match, region);
+
+            // Get team references
+            let red1 = region.getTeam(match.red1);
+            let red2 = region.getTeam(match.red2);
+            let blue1 = region.getTeam(match.blue1);
+            let blue2 = region.getTeam(match.blue2);
+
+            // Set predicted EPA values for the match
+            match.epa.red.tot = red1.epa.tot + red2.epa.tot;
+            match.epa.red.auto = red1.epa.auto + red2.epa.auto;
+            match.epa.red.dc = red1.epa.dc + red2.epa.dc;
+            match.epa.red.eg = red1.epa.eg + red2.epa.eg;
+
+            match.epa.blue.tot = blue1.epa.tot + blue2.epa.tot;
+            match.epa.blue.auto = blue1.epa.auto + blue2.epa.auto;
+            match.epa.blue.dc = blue1.epa.dc + blue2.epa.dc;
+            match.epa.blue.eg = blue1.epa.eg + blue2.epa.eg;
+
+            // Update Elo ratings based on match results
+            // Using optimal coefficient of 0.007 based on original code comments
+            let predScoreMargin = 0.007 * ((red1.elo + red2.elo) - (blue1.elo + blue2.elo));
+            let actualScoreMargin = (match.redScore - match.blueScore) / (region.getScoreStandardDeviation());
+            
+            // Dynamic K-factor based on match type and experience
+            let isQual = match.id < 1000;
+            let avgMatchN = (red1.matches + red2.matches + blue1.matches + blue2.matches) / 4;
+            
+            // Optimized K-factor calculation from testing
+            let K = isQual ? Math.max(6 + ((1/3) * -avgMatchN), 4.5) : 4.5;
+            
+            // Calculate Elo adjustment
+            let deltaR = K * (actualScoreMargin - predScoreMargin);
+            
+            // Higher aggression value (5) for faster adaptation to team changes
+            let aggrValue = 5;
+            
+            // Apply Elo adjustments with appropriate weights
+            red1.elo += deltaR * (isUnofficial ? 0.5 : aggrValue);
+            red2.elo += deltaR * (isUnofficial ? 0.5 : aggrValue);
+            blue1.elo -= deltaR * (isUnofficial ? 0.5 : aggrValue);
+            blue2.elo -= deltaR * (isUnofficial ? 0.5 : aggrValue);
+
+            // Update EPA values (only for qualification matches)
+            if (match.id < 1000) {
+                // Calculate prediction errors
+                let predictedScoreMargin = (red1.epa.tot + red2.epa.tot) - (blue1.epa.tot + blue2.epa.tot);
+                let actualScoreMargin = match.redScore - match.blueScore;
+                let deltaEPA = (actualScoreMargin - predictedScoreMargin);
+
+                // Improved EPA update with stronger weight on actual performance
+                const redEPA = red1.epa.tot + red2.epa.tot;
+                const blueEPA = blue1.epa.tot + blue2.epa.tot;
+                const redDiff = match.redScore - redEPA;
+                const blueDiff = match.blueScore - blueEPA;
+
+                // Optimized EPA update formula with higher learning rate
+                const epaLearningFactor = 1.5; // Increase learning rate for faster adaptation
+                
+                // Update total EPA
+                red1.epa.tot += epaLearningFactor * red1.getK() * (1/(1 + red1.getM())) * (redDiff - red1.getM() * blueDiff) * (isUnofficial ? 0.25 : 1);
+                red2.epa.tot += epaLearningFactor * red2.getK() * (1/(1 + red2.getM())) * (redDiff - red2.getM() * blueDiff) * (isUnofficial ? 0.25 : 1);
+                blue1.epa.tot += epaLearningFactor * blue1.getK() * (1/(1 + blue1.getM())) * (blueDiff - blue1.getM() * redDiff) * (isUnofficial ? 0.25 : 1);
+                blue2.epa.tot += epaLearningFactor * blue2.getK() * (1/(1 + blue2.getM())) * (blueDiff - blue2.getM() * redDiff) * (isUnofficial ? 0.25 : 1);
+
+                // Update Auto EPA with higher weighting (most predictable phase)
+                const autoWeight = 1.2;
+                red1.epa.auto += autoWeight * red1.getK() * (match.redAuto - (red1.epa.auto + red2.epa.auto)) * (isUnofficial ? 0.25 : 1);
+                red2.epa.auto += autoWeight * red2.getK() * (match.redAuto - (red1.epa.auto + red2.epa.auto)) * (isUnofficial ? 0.25 : 1);
+                blue1.epa.auto += autoWeight * blue1.getK() * (match.blueAuto - (blue1.epa.auto + blue2.epa.auto)) * (isUnofficial ? 0.25 : 1);
+                blue2.epa.auto += autoWeight * blue2.getK() * (match.blueAuto - (blue1.epa.auto + blue2.epa.auto)) * (isUnofficial ? 0.25 : 1);
+
+                // Update Driver Control EPA
+                const dcWeight = 1.0;
+                red1.epa.dc += dcWeight * red1.getK() * (match.redDC - (red1.epa.dc + red2.epa.dc)) * (isUnofficial ? 0.25 : 1);
+                red2.epa.dc += dcWeight * red2.getK() * (match.redDC - (red1.epa.dc + red2.epa.dc)) * (isUnofficial ? 0.25 : 1);
+                blue1.epa.dc += dcWeight * blue1.getK() * (match.blueDC - (blue1.epa.dc + blue2.epa.dc)) * (isUnofficial ? 0.25 : 1);
+                blue2.epa.dc += dcWeight * blue2.getK() * (match.blueDC - (blue1.epa.dc + blue2.epa.dc)) * (isUnofficial ? 0.25 : 1);
+                
+                // Update Endgame EPA
+                const egWeight = 0.9;
+                red1.epa.eg += egWeight * red1.getK() * (match.redEG - (red1.epa.eg + red2.epa.eg)) * (isUnofficial ? 0.25 : 1);
+                red2.epa.eg += egWeight * red2.getK() * (match.redEG - (red1.epa.eg + red2.epa.eg)) * (isUnofficial ? 0.25 : 1);
+                blue1.epa.eg += egWeight * blue1.getK() * (match.blueEG - (blue1.epa.eg + blue2.epa.eg)) * (isUnofficial ? 0.25 : 1);
+                blue2.epa.eg += egWeight * blue2.getK() * (match.blueEG - (blue1.epa.eg + blue2.epa.eg)) * (isUnofficial ? 0.25 : 1);
+            }
+
+            // Update match counts
+            if (isUnofficial) {
+                red1.matches += 1 / 6;
+                red2.matches += 1 / 6;
+                blue1.matches += 1 / 6;
+                blue2.matches += 1 / 6;
+            } else {
+                red1.matches += 1;
+                red2.matches += 1;
+                blue1.matches += 1;
+                blue2.matches += 1;
+            }
+
+            processedMatches++;
+            if (processedMatches % 500 == 0) {
+                console.log("Gone through", processedMatches, `matches! (${Math.round(processedMatches / totalMatches * 10000) / 100}%)`);
+            }
+        }
+    }
+    
+    analyzeRegionAccuracy(region);
+
+    return region;
+}
+
+/**
+ * Calculates the win probability for a match using a hybrid approach
+ * @param {Match} match - The match to calculate win probability for
+ * @param {Region} region - The region containing teams
+ * @returns {number} - Win probability between 0 and 1
+ */
+function calculateWinProbability(match, region) {
+    const red1 = region.getTeam(match.red1);
+    const red2 = region.getTeam(match.red2);
+    const blue1 = region.getTeam(match.blue1);
+    const blue2 = region.getTeam(match.blue2);
+    
+    // Weight factors for different rating components
+    const eloWeight = 0.65;  // Higher weight on Elo (proven to work well)
+    const epaWeight = 0.35;  // Lower weight on EPA
+    
+    // Calculate Elo difference (normalized)
+    const eloDiff = ((red1.elo + red2.elo) - (blue1.elo + blue2.elo)) / 400;
+    
+    // Calculate EPA difference (normalized by typical match score ~100)
+    const epaDiff = ((red1.epa.tot + red2.epa.tot) - (blue1.epa.tot + blue2.epa.tot)) / 100;
+    
+    // Combined strength difference
+    const combinedDiff = eloDiff * eloWeight + epaDiff * epaWeight;
+    
+    // Use logistic function with optimized scaling factor
+    return 1 / (1 + Math.exp(-combinedDiff * 3));
+}
+
+/**
+ * Updates Match class to use the new win probability calculation
+ */
+Match.prototype.winProbability = function(elo1, elo2, elob1, elob2) {
+    if (Region.Instance == null && (elo1 == null || elo2 == null || elob1 == null || elob2 == null)) {
+        throw new Error("Region not loaded!");
+    }
+
+    const red1 = Region.Instance.getTeam(this.red1);
+    const red2 = Region.Instance.getTeam(this.red2);
+    const blue1 = Region.Instance.getTeam(this.blue1);
+    const blue2 = Region.Instance.getTeam(this.blue2);
+
+    const red1elo = elo1 || red1.elo;
+    const red2elo = elo2 || red2.elo;
+    const blue1elo = elob1 || blue1.elo;
+    const blue2elo = elob2 || blue2.elo;
+
+    // Weight factors for different rating components
+    const eloWeight = 0.65;
+    const epaWeight = 0.35;
+    
+    // Calculate Elo difference (normalized)
+    const eloDiff = ((red1elo + red2elo) - (blue1elo + blue2elo)) / 400;
+    
+    // Calculate EPA difference (normalized)
+    const epaDiff = ((red1.epa.tot + red2.epa.tot) - (blue1.epa.tot + blue2.epa.tot)) / 100;
+    
+    // Combined strength difference
+    const combinedDiff = eloDiff * eloWeight + epaDiff * epaWeight;
+    
+    // Use optimized logistic function with adjusted scaling
+    const winProb = 1 / (1 + Math.exp(-combinedDiff * 3));
+    
+    // Apply S-curve transformation for more extreme predictions when very confident
+    return (100 / (1 + Math.exp(-(winProb * 100 - 50) / 12))) / 100;
+};
+
+/**
+ * Optimized version of the Team.getK method to improve learning rates
+ */
+Team.prototype.getK = function() {
+    if (this.matches <= 2) {
+        return 0.5; // Higher initial learning rate
+    } else if (this.matches > 2 && this.matches <= 8) {
+        return 0.5 - ((1/25) * (this.matches - 2)); // More gradual decline
+    } else {
+        return 0.26; // Higher floor for learning rate
+    }
+};
+
+/**
+ * Optimized version of the Team.getM method
+ */
+Team.prototype.getM = function() {
+    if (this.matches <= 3) { // Reduced threshold
+        return 0;
+    } else if (this.matches > 3 && this.matches <= 9) { // Smooth transition
+        return (1/6) * (this.matches - 3);
+    } else {
+        return 1;
+    }
+};
+
+/**
+ * Adds a score prediction method to Match class
+ */
+Match.prototype.predictScore = function() {
+    if (Region.Instance == null) {
+        throw new Error("Region not loaded!");
+    }
+    
+    const red1 = Region.Instance.getTeam(this.red1);
+    const red2 = Region.Instance.getTeam(this.red2);
+    const blue1 = Region.Instance.getTeam(this.blue1);
+    const blue2 = Region.Instance.getTeam(this.blue2);
+    
+    let redScore = red1.epa.tot + red2.epa.tot;
+    let blueScore = blue1.epa.tot + blue2.epa.tot;
+    
+    // Elo adjustment factor (slight boost to better teams)
+    const eloDiff = ((red1.elo + red2.elo) - (blue1.elo + blue2.elo));
+    const eloAdjustment = eloDiff * 0.03; // Small adjustment based on Elo
+    
+    redScore += eloAdjustment;
+    blueScore -= eloAdjustment;
+    
+    return {
+        red: Math.round(redScore),
+        blue: Math.round(blueScore),
+        winProbability: this.winProbability()
+    };
+};
 
 export {
     getMatch,
     getEPATeam,
-    predictMatch
+    predictMatch,
+    
+    Match
 }

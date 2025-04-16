@@ -170,12 +170,12 @@ export default function EventMatches({ matches, filter, eventCode }) {
                                 </div>
                                 <div>
                                     <span className={scores ? (scores.red.totalPoints > scores.blue.totalPoints ? styles["strong"] : "") : ""}>
-                                        {predRedEPA > -1 ? Math.round(predRedEPA) : "n/a"}
+                                        {predRedEPA > -1 ? Math.round(predRedEPA / 2) : "n/a"}
                                     </span>
                                 </div>
                                 <div>
                                     <span className={scores ? (scores.blue.totalPoints > scores.red.totalPoints ? styles["strong"] : "") : ""}>
-                                        {predBlueEPA > -1 ? Math.round(predBlueEPA) : "n/a"}
+                                        {predBlueEPA > -1 ? Math.round(predBlueEPA / 2) : "n/a"}
                                     </span>
                                 </div>
                                 <div style={{

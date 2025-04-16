@@ -1,6 +1,6 @@
 import express from "express";
 import { getTeam, getLoadedTeams, getEvent } from "../ftc_scout/FTCScoutComms.mjs";
-import { getMatch, predictMatch } from "../ftc_scout/epa/EPA.mjs";
+import { getMatch, predictMatch } from "../ftc_scout/epa/local_epa.mjs";
 import bodyParser from "body-parser";
 
 const router = express.Router();

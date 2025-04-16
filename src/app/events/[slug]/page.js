@@ -6,6 +6,7 @@ import styles from "./event-slug.module.css";
 import Link from "next/link";
 import getColor from "@/modules/misc/ColorScale";
 import getURL from "@/modules/server/Server";
+import { Notice } from "@/modules/notice/Notice.mjs";
 
 function EventOverview({ eventData }) {
     const [teamData, setTeamData] = React.useState({});
@@ -410,6 +411,18 @@ function EventSlug({ params }) {
     return (
         <div>
             <Menu></Menu>
+            <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <Notice>
+                        <h1 className="bold">Warning Notice</h1>
+                        <p>Due to the large data complexity with Worlds, the dataset is currently restricted to <span style={{ fontWeight: "bold" }}>championships</span> and <span style={{ fontWeight: "bold" }}>FIRST World Championship</span>. Thank you for your understanding.</p> <br/>
+                        <p>Additionally, the website is better suited for <span style={{ fontWeight: "bold" }}>laptop</span>.</p>
+                    </Notice>
+            </div>
             <EventDisplay eventData={eventData}></EventDisplay>
         </div>
     )

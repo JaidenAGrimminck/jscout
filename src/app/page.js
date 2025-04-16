@@ -7,6 +7,7 @@ import Link from "next/link";
 import Menu from "../modules/menu/menu";
 import getURL from "@/modules/server/Server";
 import ConnectedToBackend from "@/modules/server/Connection";
+import { Notice } from "@/modules/notice/Notice.mjs";
 
 export default function Home() {
     const [loadedTeams, setLoadedTeams] = useState([]);
@@ -35,6 +36,20 @@ export default function Home() {
             <Menu></Menu>
             <div className={styles.home}>
                 <h1>Home</h1>
+
+                <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <Notice>
+                        <h1 className="bold">Warning Notice</h1>
+                        <p>Due to the large data complexity with Worlds, the dataset is currently restricted to <span style={{ fontWeight: "bold" }}>championships</span> and <span style={{ fontWeight: "bold" }}>FIRST World Championship</span>. Thank you for your understanding.</p> <br/>
+                        <p>Additionally, the website is better suited for <span style={{ fontWeight: "bold" }}>laptop</span>.</p>
+                    </Notice>
+                </div>
+
                 <span>
                     Loaded teams in memory: {loadedTeams.length}
                 </span> <br/>
