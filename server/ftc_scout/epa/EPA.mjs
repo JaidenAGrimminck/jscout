@@ -1476,20 +1476,20 @@ function calculateWinProbability(match, region) {
 /**
  * Updates Match class to use the new win probability calculation
  */
-Match.prototype.winProbability = function(elo1, elo2, elob1, elob2) {
-    if (Region.Instance == null && (elo1 == null || elo2 == null || elob1 == null || elob2 == null)) {
+Match.prototype.winProbability = function(red1, red2, blue1, blue2) {
+    if (Region.Instance == null && (red1 == null || red2 == null || blue1 == null || blue2 == null)) {
         throw new Error("Region not loaded!");
     }
 
-    const red1 = Region.Instance.getTeam(this.red1);
-    const red2 = Region.Instance.getTeam(this.red2);
-    const blue1 = Region.Instance.getTeam(this.blue1);
-    const blue2 = Region.Instance.getTeam(this.blue2);
+    red1 = red1 || Region.Instance.getTeam(this.red1);
+    red2 = red2 || Region.Instance.getTeam(this.red2);
+    blue1 = blue1 || Region.Instance.getTeam(this.blue1);
+    blue2 = blue2 || Region.Instance.getTeam(this.blue2);
 
-    const red1elo = elo1 || red1.elo;
-    const red2elo = elo2 || red2.elo;
-    const blue1elo = elob1 || blue1.elo;
-    const blue2elo = elob2 || blue2.elo;
+    const red1elo = red1.elo;
+    const red2elo = red2.elo;
+    const blue1elo = blue1.elo;
+    const blue2elo = blue2.elo;
 
     // Weight factors for different rating components
     const eloWeight = 0.65;

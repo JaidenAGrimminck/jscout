@@ -31,6 +31,7 @@ function SearchbarDropdownItem(props) {
 function MenuSearchbar(props) {
     const [isDropdownVisible, setDropdownVisible] = React.useState(false);
     const [teamData, setTeamData] = React.useState([]);
+    const router = useRouter();
 
     const handleFocus = () => {
         setDropdownVisible(true);

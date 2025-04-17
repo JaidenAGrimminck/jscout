@@ -26,6 +26,10 @@ const delay_before_update = 1000 * 60 * 60 * 24 * 7 * 10; // 1 week
 //atomic variable
 let fileCurrentlyBeingAccessed = false;
 
+async function getTeamFast(teamNumber) {
+    return Memory.get("teams").find(team => team["number"] === teamNumber);
+}
+
 /**
  * Gets the team data for a team number
  * @param {Number} teamNumber The team number to get data for
@@ -659,4 +663,4 @@ function getLoadedTeams() {
     return team_date_pair;
 }
 
-export { getTeam, getLoadedTeams, getEvent, getLoadedEvents, getMemory, saveToMemory, pruneMemory, saveData, getTeams, getEvents };
+export { getTeam, getLoadedTeams, getEvent, getLoadedEvents, getMemory, saveToMemory, pruneMemory, saveData, getTeams, getEvents, getTeamFast };

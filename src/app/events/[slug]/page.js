@@ -7,6 +7,7 @@ import Link from "next/link";
 import getColor from "@/modules/misc/ColorScale";
 import getURL from "@/modules/server/Server";
 import { Notice } from "@/modules/notice/Notice.mjs";
+import EventMatches from "@/modules/matches/EventMatch";
 
 function EventOverview({ eventData }) {
     const [teamData, setTeamData] = React.useState({});
@@ -355,6 +356,7 @@ function EventMenuItem({ title, evt, active }) {
 
 function EventDisplay({ eventData}) {
     const [eventDataDisplay, setEventDataDisplay] = React.useState(null);
+    const [matches, setMatches] = React.useState(null);
 
     const MenuTo = (evt) => {
         return () => {
@@ -365,6 +367,10 @@ function EventDisplay({ eventData}) {
     React.useEffect(() => {
         setEventDataDisplay("Overview");
     }, []);
+
+    if (eventData != null) {
+        console.log("evt data not null")
+    }
 
     return (
         <div className={styles["event-display"]}>
@@ -379,6 +385,9 @@ function EventDisplay({ eventData}) {
                 </div>
                 {
                     eventDataDisplay == "Overview" && <EventOverview eventData={eventData}></EventOverview>
+                }
+                {
+                    (eventDataDisplay == "Qual Matches" && eventData != null) && <EventMatches matches={eventData.matches} eventCode={eventData.code}></EventMatches>
                 }
             </div>
         </div>

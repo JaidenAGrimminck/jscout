@@ -42,7 +42,7 @@ function predictMatch(red1, red2, blue1, blue2) {
         return 0.5;
     }
 
-    return new Match(0, 0, false, red1, red2, blue1, blue2).winProbability(red1team.elo, red2team.elo, blue1team.elo, blue2team.elo);
+    return new Match(0, 0, false, red1, red2, blue1, blue2).winProbability(red1team, red2team, blue1team, blue2team);
 }
 
 export {

@@ -1,5 +1,5 @@
 import express from "express";
-import { getTeam, getLoadedTeams, getEvent } from "../ftc_scout/FTCScoutComms.mjs";
+import { getTeam, getLoadedTeams, getEvent, getTeamFast } from "../ftc_scout/FTCScoutComms.mjs";
 import { getMatch, predictMatch } from "../ftc_scout/epa/local_epa.mjs";
 import bodyParser from "body-parser";
 
@@ -63,7 +63,7 @@ router.post('/', async (req, res) => {
             return;
         }
 
-        let team1 = await getTeam(match.teams[0].teamNumber);
+        let team1 = await getTeamFast(match.teams[0].teamNumber);
 
         if (team1 === null || team1 == undefined) {
             matchesData.push(match);
