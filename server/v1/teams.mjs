@@ -36,6 +36,8 @@ router.get('/multi/:teamNumbers', async (req, res) => {
             }
         }
     }
+
+    console.log("Fetched data for teams:", teamNumbers);
     
     res.json(teamData);
 })

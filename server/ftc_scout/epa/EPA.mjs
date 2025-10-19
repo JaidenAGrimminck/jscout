@@ -1567,6 +1567,8 @@ Match.prototype.predictScore = function() {
     };
 };
 
+run_simulation();
+
 export {
     getMatch,
     getEPATeam,
