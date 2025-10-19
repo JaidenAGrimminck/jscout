@@ -10,6 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const data_location = path.join(__dirname, "/data.json");
+console.log(data_location)
 const blank_data = {
     "teams": [],
     "events": [],

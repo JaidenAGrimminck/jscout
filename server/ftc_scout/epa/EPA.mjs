@@ -1567,7 +1567,7 @@ Match.prototype.predictScore = function() {
     };
 };
 
-run_simulation();
+//run_simulation();
 
 export {
     getMatch,
