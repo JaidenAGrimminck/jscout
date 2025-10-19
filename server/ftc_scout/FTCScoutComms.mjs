@@ -22,7 +22,7 @@ const maxTeams = 25;
 
 const url = "https://api.ftcscout.org/graphql";
 
-const delay_before_update = 1000 * 60 * 60 * 24 * 7 * 10; // 1 week
+const delay_before_update = 1000 * 60 * 60 * 24 * 7 * 10 * 10000; // 1 week
 
 //atomic variable
 let fileCurrentlyBeingAccessed = false;

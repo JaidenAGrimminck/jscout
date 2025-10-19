@@ -59,11 +59,13 @@ router.get('/:teamNumber', async (req, res) => {
 
     if (epa !== null) {
         try {
-        teamData["epa"] = epa;
+            teamData["epa"] = epa;
         } catch (e) {
             console.error("Error adding EPA data for team", teamNumber, e);
         }
     }
+
+    console.log("Fetched data for team:", teamNumber);
 
     res.json(teamData);
 })
