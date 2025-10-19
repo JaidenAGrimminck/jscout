@@ -29,7 +29,11 @@ router.get('/multi/:teamNumbers', async (req, res) => {
         let epa = getEPATeam(teamNumbers[i]);
 
         if (epa !== null) {
+            try {
             teamData[i]["epa"] = epa;
+            } catch (e) {
+                console.error("Error adding EPA data for team", teamNumbers[i], e);
+            }
         }
     }
     
@@ -52,7 +56,11 @@ router.get('/:teamNumber', async (req, res) => {
     let epa = getEPATeam(teamNumber);
 
     if (epa !== null) {
+        try {
         teamData["epa"] = epa;
+        } catch (e) {
+            console.error("Error adding EPA data for team", teamNumber, e);
+        }
     }
 
     res.json(teamData);

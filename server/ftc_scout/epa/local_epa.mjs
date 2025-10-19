@@ -4,7 +4,8 @@ import { fileURLToPath } from 'url';
 import { Match } from './EPA.mjs';
 
 
-const epa_mem = JSON.parse(fs.readFileSync("regiondata_cld.json"));
+const epa_mem = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../../ftc_scout/data.json')));
+
 
 const t_ = epa_mem.teams;
 const e_ = epa_mem.events;
